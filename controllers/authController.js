@@ -37,6 +37,11 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
+  const userExist = await User.find({email: req.body.email});
+  console.log(JSON.stringify(userExist));
+  if (JSON.stringify(userExist)!="[]") {
+    return next(new AppError("Email này đã được đăng ký.", 500));
+  }
   const newUser = await User.create({
     name: req.body.name,
     email: req.body.email,
