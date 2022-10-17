@@ -35,11 +35,66 @@ const createSendToken = (user, statusCode, res) => {
     },
   });
 };
+const sendVerifyToken = catchAsync(async (user, statusCode, res) => {
+  // 1) create token to verify
+  const verifyToken = user.createVerifyToken();
+  await user.save({ validateBeforeSave: false });
+
+  // 2) Send it to user's email
+  const verifyURL = `http://localhost:5173/verify`;
+  const message = `If you are owner account? go to this link and verify your account at:  ${verifyURL}.\nYour encode is: ${verifyToken}\n.If didn't you, please ignore this email!`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "verify User",
+      message,
+    });
+    res.status(statusCode).json({
+      status: "success",
+      message: "Token sent to email!",
+    });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+exports.verifyUser = catchAsync(async (req, res, next) => {
+  // 1) Get user based on the token
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.body.encode)
+    .digest("hex");
+
+  const user = await User.findOne({
+    userVerifyToken: hashedToken,
+  });
+
+  // 2) If token true, verify this user
+  if (!user) {
+    return next(new AppError("Token is invalid or has expired", 400));
+  }
+  user.active = "active";
+  user.userVerifyToken = undefined;
+  await User.updateOne(
+    {
+      user: user
+    },
+    {
+      $set: {"active": "active"},
+      $unset: {"userVerifyToken": "" }
+    }
+  )
+
+  // 3) Update changedPasswordAt property for the user
+  // 4) Log the user in, send JWT
+  createSendToken(user, 200, res);
+});
 
 exports.signup = catchAsync(async (req, res, next) => {
-  const userExist = await User.find({email: req.body.email});
+  const userExist = await User.find({ email: req.body.email });
   console.log(JSON.stringify(userExist));
-  if (JSON.stringify(userExist)!="[]") {
+  if (JSON.stringify(userExist) != "[]") {
     return next(new AppError("Email này đã được đăng ký.", 500));
   }
   const newUser = await User.create({
@@ -49,7 +104,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
   });
 
-  createSendToken(newUser, 201, res);
+  sendVerifyToken(newUser, 201, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {

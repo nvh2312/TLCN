@@ -61,10 +61,11 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  userVerifyToken: String,
   active: {
-    type: Boolean,
-    default: true,
-    select: false,
+    type: String,
+    enum: ["active", "verify", "ban"],
+    default: "verify",
   },
 });
 
@@ -89,7 +90,7 @@ userSchema.pre("save", function (next) {
 
 userSchema.pre(/^find/, function (next) {
   // this points to the current query
-  this.find({ active: { $ne: false } });
+  this.find({ active: { $ne: "ban" } });
   next();
 });
 
@@ -128,6 +129,18 @@ userSchema.methods.createPasswordResetToken = function () {
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 
   return resetToken;
+};
+userSchema.methods.createVerifyToken = function () {
+  const verifyToken = crypto.randomBytes(32).toString("hex");
+
+  this.userVerifyToken = crypto
+    .createHash("sha256")
+    .update(verifyToken)
+    .digest("hex");
+
+  console.log({ verifyToken }, this.userVerifyToken);
+
+  return verifyToken;
 };
 
 const User = mongoose.model("User", userSchema);
