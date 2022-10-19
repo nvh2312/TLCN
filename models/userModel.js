@@ -117,7 +117,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 };
 
 userSchema.methods.createPasswordResetToken = function () {
-  const resetToken = crypto.randomBytes(32).toString("hex");
+  const resetToken = crypto.randomBytes(3).toString("hex");
 
   this.passwordResetToken = crypto
     .createHash("sha256")
@@ -131,7 +131,7 @@ userSchema.methods.createPasswordResetToken = function () {
   return resetToken;
 };
 userSchema.methods.createVerifyToken = function () {
-  const verifyToken = crypto.randomBytes(32).toString("hex");
+  const verifyToken = crypto.randomBytes(3).toString("hex");
 
   this.userVerifyToken = crypto
     .createHash("sha256")

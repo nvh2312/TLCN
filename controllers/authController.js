@@ -65,11 +65,11 @@ exports.verifyUser = catchAsync(async (req, res, next) => {
     .createHash("sha256")
     .update(req.body.encode)
     .digest("hex");
-
+  console.log(hashedToken);
   const user = await User.findOne({
     userVerifyToken: hashedToken,
   });
-
+  console.log(user);
   // 2) If token true, verify this user
   if (!user) {
     return next(new AppError("Token is invalid or has expired", 400));
@@ -78,13 +78,13 @@ exports.verifyUser = catchAsync(async (req, res, next) => {
   user.userVerifyToken = undefined;
   await User.updateOne(
     {
-      user: user
+      user: user,
     },
     {
-      $set: {"active": "active"},
-      $unset: {"userVerifyToken": "" }
+      $set: { active: "active" },
+      $unset: { userVerifyToken: "" },
     }
-  )
+  );
 
   // 3) Update changedPasswordAt property for the user
   // 4) Log the user in, send JWT
@@ -224,23 +224,27 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     );
   }
 });
-
-exports.resetPassword = catchAsync(async (req, res, next) => {
+exports.verifyResetPass = catchAsync(async (req, res, next) => {
   // 1) Get user based on the token
   const hashedToken = crypto
     .createHash("sha256")
-    .update(req.params.token)
+    .update(req.body.token)
     .digest("hex");
-
   const user = await User.findOne({
     passwordResetToken: hashedToken,
     passwordResetExpires: { $gt: Date.now() },
   });
-
   // 2) If token has not expired, and there is user, set the new password
   if (!user) {
     return next(new AppError("Token is invalid or has expired", 400));
   }
+  res.status(200).json({
+    status: "success",
+    hashedToken,
+  });
+});
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
   user.passwordResetToken = undefined;
