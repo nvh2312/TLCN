@@ -39,8 +39,18 @@ const sendVerifyToken = catchAsync(async (user, statusCode, res) => {
   // 1) create token to verify
   const verifyToken = user.createVerifyToken();
   await user.save({ validateBeforeSave: false });
+  // 2) create cookie to client
+  const token = signToken(user._id);
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+  if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
 
-  // 2) Send it to user's email
+  res.cookie("jwt", token, cookieOptions);
+  // 3) Send it to user's email
   const verifyURL = `http://localhost:5173/verify`;
   const message = `If you are owner account? go to this link and verify your account at:  ${verifyURL}.\nYour encode is: ${verifyToken}\n.If didn't you, please ignore this email!`;
 
@@ -50,8 +60,14 @@ const sendVerifyToken = catchAsync(async (user, statusCode, res) => {
       subject: "verify User",
       message,
     });
+    user.password = undefined;
+
     res.status(statusCode).json({
       status: "success",
+      token,
+      data: {
+        user,
+      },
       message: "Token sent to email!",
     });
   } catch (err) {
@@ -72,19 +88,11 @@ exports.verifyUser = catchAsync(async (req, res, next) => {
   console.log(user);
   // 2) If token true, verify this user
   if (!user) {
-    return next(new AppError("Token is invalid or has expired", 400));
+    return next(new AppError("Mã xác nhận không hợp lệ hoặc đã hết hạn", 400));
   }
   user.active = "active";
   user.userVerifyToken = undefined;
-  await User.updateOne(
-    {
-      user: user,
-    },
-    {
-      $set: { active: "active" },
-      $unset: { userVerifyToken: "" },
-    }
-  );
+  await user.save({ validateBeforeSave: false });
 
   // 3) Update changedPasswordAt property for the user
   // 4) Log the user in, send JWT
@@ -131,19 +139,25 @@ exports.login = catchAsync(async (req, res, next) => {
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  }
-
-  if (!token) {
+  console.log(req.headers.authorization);
+  try {
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+      console.log(req.headers.authorization);
+    } else if (req.cookies.jwt) {
+      token = req.cookies.jwt;
+    }
+  } catch (error) {
     return next(
-      new AppError("You are not logged in! Please log in to get access.", 401)
+      new AppError(
+        "Bạn chưa đăng nhập hoặc đăng ký. Vui lòng thực hiện!!!",
+        401
+      )
     );
   }
-
   // 2) Verification token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
@@ -167,12 +181,13 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
+  res.locals.user = currentUser;
   next();
 });
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    // roles ['admin', 'lead-guide']. role='user'
+    // roles ['admin', 'employee',[user]]. role='user'
     if (!roles.includes(req.user.role)) {
       return next(
         new AppError("You do not have permission to perform this action", 403)
@@ -245,6 +260,19 @@ exports.verifyResetPass = catchAsync(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
+  // 1) Get user based on the token
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+  // 2) If token has not expired, and there is user, set the new password
+  if (!user) {
+    return next(new AppError("Token is invalid or has expired", 400));
+  }
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
   user.passwordResetToken = undefined;
@@ -274,3 +302,11 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // 4) Log user in, send JWT
   createSendToken(user, 200, res);
 });
+
+exports.logout = (req, res) => {
+  res.cookie("jwt", "loggedout", {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: "success" });
+};

@@ -9,16 +9,17 @@ const hpp = require("hpp");
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const userRouter = require("./routes/userRoutes");
-const cors = require('cors')
-
-
+const cors = require("cors");
 
 const app = express();
 // Add headers before the routes are defined
-app.use(cors({
-  origin: 'http://127.0.0.1:5173',
-  methods: ['POST', 'GET', 'PUT', 'DELETE']
-}))
+app.use(
+  cors({
+    origin: "http://127.0.0.1:5173",
+    methods: ["POST", "GET", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 // 1) GLOBAL MIDDLEWARE
 // Set security HTTP headers
 app.use(helmet());

@@ -6,7 +6,8 @@ const router = express.Router();
 
 router.post('/signup', authController.signup);
 router.post('/login', authController.login);
-router.post('/verify', authController.verifyUser);
+router.get('/logout', authController.logout);
+
 router.post('/verifyResetPass', authController.verifyResetPass);
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
@@ -14,6 +15,7 @@ router.patch('/resetPassword/:token', authController.resetPassword);
 // Protect all routes after this middleware
 router.use(authController.protect);
 
+router.post('/verify', authController.verifyUser);
 router.patch('/updateMyPassword', authController.updatePassword);
 router.get('/me', userController.getMe, userController.getUser);
 router.patch('/updateMe', userController.updateMe);
