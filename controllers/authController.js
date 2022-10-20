@@ -12,6 +12,34 @@ const signToken = (id) => {
   });
 };
 
+const changeState = (user, state, statusCode, res) => {
+  user.active = state;
+  const message = "Cập nhật trạng thái user thành công!!!";
+  user.save();
+  res.status(statusCode).json({
+    status: "success",
+    message,
+  });
+};
+exports.changeStateUser = catchAsync(async (req, res, next) => {
+  // 1) get token from cookie and state update to user
+  const token = req.cookies.jwt;
+  const state = req.body.state;
+  // 2) Verification token
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+  // 3) Check if user still exists
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) {
+    return next(
+      new AppError(
+        "The user belonging to this token does no longer exist.",
+        401
+      )
+    );
+  }
+  changeState(currentUser, state, 200, res);
+});
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
   const cookieOptions = {
