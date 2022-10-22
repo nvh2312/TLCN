@@ -15,7 +15,7 @@ const signToken = (id) => {
 const changeState = (user, state, statusCode, res) => {
   user.active = state;
   const message = "Cập nhật trạng thái user thành công!!!";
-  user.save();
+  user.save({validateBeforeSave: false});
   res.status(statusCode).json({
     status: "success",
     message,
@@ -51,6 +51,7 @@ const createSendToken = (user, statusCode, res) => {
   if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
 
   res.cookie("jwt", token, cookieOptions);
+  res.locals.user = user;
 
   // Remove password from output
   user.password = undefined;
@@ -88,14 +89,10 @@ const sendVerifyToken = catchAsync(async (user, statusCode, res) => {
       subject: "verify User",
       message,
     });
-    user.password = undefined;
 
     res.status(statusCode).json({
       status: "success",
       token,
-      data: {
-        user,
-      },
       message: "Token sent to email!",
     });
   } catch (err) {
@@ -191,6 +188,8 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // 3) Check if user still exists
   const currentUser = await User.findById(decoded.id);
+  console.log(decoded.id);
+  console.log(currentUser);
   if (!currentUser) {
     return next(
       new AppError(
@@ -209,7 +208,6 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
-  res.locals.user = currentUser;
   next();
 });
 

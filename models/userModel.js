@@ -67,6 +67,9 @@ const userSchema = new mongoose.Schema({
     enum: ["active", "verify", "ban"],
     default: "verify",
   },
+  dateOfBirth: Date,
+  gender: Number,
+
 });
 
 userSchema.pre("save", async function (next) {
@@ -90,7 +93,7 @@ userSchema.pre("save", function (next) {
 
 userSchema.pre(/^find/, function (next) {
   // this points to the current query
-  this.find({ active: { $ne: "ban" } });
+  // this.find({ active: { $ne: "ban" } });
   next();
 });
 

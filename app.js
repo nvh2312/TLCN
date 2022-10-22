@@ -5,24 +5,26 @@ const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const userRouter = require("./routes/userRoutes");
-const cors = require("cors");
 
 const app = express();
 // Add headers before the routes are defined
 app.use(
   cors({
     origin: "http://127.0.0.1:5173",
-    methods: ["POST", "GET", "PUT", "DELETE"],
+    methods: ["POST", "GET", "PUT", "PATCH", "DELETE"],
     credentials: true,
   })
 );
 // 1) GLOBAL MIDDLEWARE
 // Set security HTTP headers
 app.use(helmet());
+app.use(cookieParser());
 
 // Development logging
 if (process.env.NODE_ENV === "development") {
