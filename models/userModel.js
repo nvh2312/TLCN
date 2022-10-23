@@ -15,7 +15,11 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     validate: [validator.isEmail, "Please provide a valid email"],
   },
-  avatar: String,
+  avatar: {
+    type: String,
+    default:
+      "https://png.pngtree.com/png-clipart/20200701/original/pngtree-default-avatar-png-image_5407175.jpg",
+  },
   role: {
     type: String,
     enum: ["user", "employee", "admin"],
@@ -44,12 +48,6 @@ const userSchema = new mongoose.Schema({
   },
   address: [
     {
-      type: {
-        type: String,
-        default: "Point",
-        enum: ["Point"],
-      },
-      coordinates: [Number],
       name: String,
       phone: String,
       province: String,
@@ -69,7 +67,6 @@ const userSchema = new mongoose.Schema({
   },
   dateOfBirth: Date,
   gender: Number,
-
 });
 
 userSchema.pre("save", async function (next) {
@@ -91,11 +88,11 @@ userSchema.pre("save", function (next) {
   next();
 });
 
-userSchema.pre(/^find/, function (next) {
-  // this points to the current query
-  // this.find({ active: { $ne: "ban" } });
-  next();
-});
+// userSchema.pre(/^find/, function (next) {
+//   // this points to the current query
+//   // this.find({ active: { $ne: "ban" } });
+//   next();
+// });
 
 userSchema.methods.correctPassword = async function (
   candidatePassword,

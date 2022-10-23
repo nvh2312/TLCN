@@ -12,12 +12,17 @@ const signToken = (id) => {
   });
 };
 
-const changeState = (user, state, statusCode, res) => {
+const changeState = async (user, state, statusCode, res) => {
   user.active = state;
   const message = "Cập nhật trạng thái user thành công!!!";
-  user.save({validateBeforeSave: false});
+  await user.save({ validateBeforeSave: false });
+  user.password = undefined;
+
   res.status(statusCode).json({
     status: "success",
+    data: {
+      user,
+    },
     message,
   });
 };
@@ -82,7 +87,7 @@ const sendVerifyToken = catchAsync(async (user, statusCode, res) => {
   // 3) Send it to user's email
   const verifyURL = `http://localhost:5173/verify`;
   const message = `If you are owner account? go to this link and verify your account at:  ${verifyURL}.\nYour encode is: ${verifyToken}\n.If didn't you, please ignore this email!`;
-
+  user.password = undefined;
   try {
     await sendEmail({
       email: user.email,
@@ -93,6 +98,9 @@ const sendVerifyToken = catchAsync(async (user, statusCode, res) => {
     res.status(statusCode).json({
       status: "success",
       token,
+      data: {
+        user,
+      },
       message: "Token sent to email!",
     });
   } catch (err) {
@@ -156,22 +164,28 @@ exports.login = catchAsync(async (req, res, next) => {
   ) {
     return next(new AppError("Incorrect email or password", 401));
   }
+  // 3) Check if user not verify, send code to gmail
+  if (user.active == "verify") {
+    sendVerifyToken(user, 201, res);
+  }
 
-  // 3) If everything ok, send token to client
-  createSendToken(user, 200, res);
+  // 4) If everything ok, send token to client
+  else {
+    createSendToken(user, 200, res);
+  }
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
-  console.log(req.headers.authorization);
+  // console.log(req.headers.authorization);
   try {
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
     ) {
       token = req.headers.authorization.split(" ")[1];
-      console.log(req.headers.authorization);
+      // console.log(req.headers.authorization);
     } else if (req.cookies.jwt) {
       token = req.cookies.jwt;
     }
@@ -188,8 +202,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // 3) Check if user still exists
   const currentUser = await User.findById(decoded.id);
-  console.log(decoded.id);
-  console.log(currentUser);
+
   if (!currentUser) {
     return next(
       new AppError(
@@ -219,7 +232,6 @@ exports.restrictTo = (...roles) => {
         new AppError("You do not have permission to perform this action", 403)
       );
     }
-
     next();
   };
 };
