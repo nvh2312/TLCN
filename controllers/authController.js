@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
 const User = require("./../models/userModel");
+const Review = require("./../models/reviewModel");
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("./../utils/appError");
 const sendEmail = require("./../utils/email");
@@ -235,6 +236,15 @@ exports.restrictTo = (...roles) => {
     next();
   };
 };
+exports.isOwner = catchAsync(async (req, res, next) => {
+  // 1) Get review id from param and findById to get review information
+  const review = await Review.findById(req.params.id);
+  // 2) if user is owner, allow to update or delete data
+  if(req.user.id != review.user.id){
+    return next(new AppError("You do not have permission to perform this action", 403));
+  }
+  next();
+});
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email

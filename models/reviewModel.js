@@ -87,17 +87,14 @@ reviewSchema.post("save", function () {
 // findByIdAndUpdate
 // findByIdAndDelete
 // reviewSchema.pre(/^findOneAnd/, async function (next) {
-//   console.log("ok");
-//   this.r = await this.find({ id: this._conditions });
-//   console.log(this.r);
+//   this.r = await this.findOne();
+//   // console.log(this.r);
 //   next();
 // });
 
-reviewSchema.post(/^findOneAnd/, async function () {
-  this.r = await this.find({ id: this._conditions });
-  console.log(this);
-  await this.r.constructor.calcAverageRatings(this.r.product);
-});
+// reviewSchema.post(/^findOneAnd/, async function () {
+//   await this.r.constructor.calcAverageRatings(this.r.product);
+// });
 
 const Review = mongoose.model("Review", reviewSchema);
 

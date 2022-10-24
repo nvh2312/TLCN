@@ -2,6 +2,7 @@ const catchAsync = require("./../utils/catchAsync");
 const AppError = require("./../utils/appError");
 const APIFeatures = require("./../utils/apiFeatures");
 const Product = require("./../models/productModel");
+const Review = require("./../models/reviewModel");
 
 exports.deleteOne = (Model) =>
   catchAsync(async (req, res, next) => {
@@ -18,10 +19,25 @@ exports.deleteOne = (Model) =>
   });
 
 exports.updateOne = (Model) =>
-  catchAsync(async (req, res, next) => {   
+  catchAsync(async (req, res, next) => {
     if (Model == Product) {
       req.body.updatedBy = req.user.id;
-      req.body.updatedAt = Date.now()-1000;
+      req.body.updatedAt = Date.now() - 1000;
+    }
+    if (Model == Review) {
+      let review = await Model.findById(req.params.id);
+      if (!review) {
+        return next(new AppError("No document found with that ID", 404));
+      }
+      if (req.body.rating) review.rating = req.body.rating;
+      if (req.body.star) review.review = req.body.review;
+      review.save();
+      res.status(200).json({
+        status: "success",
+        data: {
+          data: review,
+        },
+      });
     }
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true,

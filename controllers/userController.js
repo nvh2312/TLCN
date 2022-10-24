@@ -1,11 +1,11 @@
-const User = require('./../models/userModel');
-const catchAsync = require('./../utils/catchAsync');
-const AppError = require('./../utils/appError');
-const factory = require('./handlerFactory');
+const User = require("./../models/userModel");
+const catchAsync = require("./../utils/catchAsync");
+const AppError = require("./../utils/appError");
+const factory = require("./handlerFactory");
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
-  Object.keys(obj).forEach(el => {
+  Object.keys(obj).forEach((el) => {
     if (allowedFields.includes(el)) newObj[el] = obj[el];
   });
   return newObj;
@@ -21,26 +21,32 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   if (req.body.password || req.body.passwordConfirm) {
     return next(
       new AppError(
-        'This route is not for password updates. Please use /updateMyPassword.',
+        "This route is not for password updates. Please use /updateMyPassword.",
         400
       )
     );
   }
 
   // 2) Filtered out unwanted fields names that are not allowed to be updated,this is all field can update:
-  const filteredBody = filterObj(req.body, 'name','avatar','gender','dateOfBirth');
+  const filteredBody = filterObj(
+    req.body,
+    "name",
+    "avatar",
+    "gender",
+    "dateOfBirth"
+  );
 
   // 3) Update user document
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
-    runValidators: true
+    runValidators: true,
   });
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: {
-      user: updatedUser
-    }
+      user: updatedUser,
+    },
   });
 });
 
@@ -48,18 +54,69 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user.id, { active: false });
 
   res.status(204).json({
-    status: 'success',
-    data: null
+    status: "success",
+    data: null,
   });
 });
 
 exports.createUser = (req, res) => {
   res.status(500).json({
-    status: 'error',
-    message: 'This route is not defined! Please use /signup instead'
+    status: "error",
+    message: "This route is not defined! Please use /signup instead",
   });
 };
-
+exports.createAddress = catchAsync(async (req, res) => {
+  const user = req.user;
+  let arr = user.address;
+  let index = arr.length;
+  const data = {
+    id: index,
+    name: req.body.name,
+    phone: req.body.phone,
+    province: req.body.province,
+    district: req.body.district,
+    ward: req.body.ward,
+    detail: req.body.detail,
+  };
+  arr.push(data);
+  user.address = arr;
+  await user.save({ validateBeforeSave: false });
+  res.status(200).json({
+    status: "success",
+    message: "You have already added address successfully.",
+  });
+});
+exports.updateAddress = catchAsync(async (req, res) => {
+  const user = req.user;
+  const id = req.body.id;
+  let arr = user.address;
+  const data = {
+    id,
+    name: req.body.name,
+    phone: req.body.phone,
+    province: req.body.province,
+    district: req.body.district,
+    ward: req.body.ward,
+    detail: req.body.detail,
+  };
+  arr[id] = data;
+  user.address = arr;
+  await user.save({ validateBeforeSave: false });
+  res.status(200).json({
+    status: "success",
+    message: "You have already updated address successfully.",
+  });
+});
+exports.getUserAddress = (req, res) => {
+  const address = req.user.address;
+  res.status(200).json({
+    status: "success",
+    data: {
+      address,
+    },
+    message: "Get all user address successfully.",
+  });
+};
 exports.getUser = factory.getOne(User);
 exports.getAllUsers = factory.getAll(User);
 
