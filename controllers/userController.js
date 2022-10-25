@@ -33,7 +33,8 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     "name",
     "avatar",
     "gender",
-    "dateOfBirth"
+    "dateOfBirth",
+    "phone"
   );
 
   // 3) Update user document
@@ -70,7 +71,6 @@ exports.createAddress = catchAsync(async (req, res) => {
   let arr = user.address;
   let index = arr.length;
   const data = {
-    id: index,
     name: req.body.name,
     phone: req.body.phone,
     province: req.body.province,
@@ -78,6 +78,7 @@ exports.createAddress = catchAsync(async (req, res) => {
     ward: req.body.ward,
     detail: req.body.detail,
   };
+  if (index == 0) data.setDefault = true;
   arr.push(data);
   user.address = arr;
   await user.save({ validateBeforeSave: false });
@@ -89,22 +90,71 @@ exports.createAddress = catchAsync(async (req, res) => {
 exports.updateAddress = catchAsync(async (req, res) => {
   const user = req.user;
   const id = req.body.id;
-  let arr = user.address;
-  const data = {
-    id,
-    name: req.body.name,
-    phone: req.body.phone,
-    province: req.body.province,
-    district: req.body.district,
-    ward: req.body.ward,
-    detail: req.body.detail,
-  };
-  arr[id] = data;
-  user.address = arr;
-  await user.save({ validateBeforeSave: false });
-  res.status(200).json({
-    status: "success",
-    message: "You have already updated address successfully.",
+  if (user.address.length > id) {
+    let arr = user.address;
+    const data = {
+      name: req.body.name,
+      phone: req.body.phone,
+      province: req.body.province,
+      district: req.body.district,
+      ward: req.body.ward,
+      detail: req.body.detail,
+    };
+    arr[id] = data;
+    user.address = arr;
+    await user.save({ validateBeforeSave: false });
+    res.status(200).json({
+      status: "success",
+      message: "You have already updated address successfully.",
+    });
+  }
+  res.status(500).json({
+    status: "error",
+    message: "This data is not exist. Please try again!!!",
+  });
+});
+exports.deleteAddress = catchAsync(async (req, res) => {
+  const user = req.user;
+  const address = user.address;
+  const index = req.body.id;
+  if (address.length > index) {
+    const check = address[index].setDefault;
+    address.splice(index, 1);
+    if (check == true && address.length > 0) {
+      address[0].setDefault = true;
+    }
+    user.address = address;
+    await user.save({ validateBeforeSave: false });
+    return res.status(200).json({
+      status: "success",
+      message: "Delete address successfully.",
+    });
+  }
+  res.status(500).json({
+    status: "error",
+    message: "This data is not exist. Please try again!!!",
+  });
+});
+exports.setDefaultAddress = catchAsync(async (req, res) => {
+  const user = req.user;
+  const address = user.address;
+  const index = req.body.id;
+  if (address.length > index) {
+    const current = address.findIndex((value) => value.setDefault == true);
+    address[index].setDefault = true;
+    console.log(address[index])
+    address[current].setDefault = false;
+    user.address = address;
+    console.log(address);
+    await user.save({ validateBeforeSave: false });
+    return res.status(200).json({
+      status: "success",
+      message: "Set default address successfully.",
+    });
+  }
+  res.status(500).json({
+    status: "error",
+    message: "This data is not exist. Please try again!!!",
   });
 });
 exports.getUserAddress = (req, res) => {

@@ -23,6 +23,8 @@ router.delete("/deleteMe", userController.deleteMe);
 router.get("/me/address", userController.getUserAddress);  
 router.patch("/createAddress", userController.createAddress);
 router.patch("/updateAddress", userController.updateAddress);
+router.patch("/setDefaultAddress", userController.setDefaultAddress);
+router.delete("/deleteAddress", userController.deleteAddress);
 
 router.use(authController.restrictTo("admin"));
 

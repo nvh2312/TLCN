@@ -48,13 +48,16 @@ const userSchema = new mongoose.Schema({
   },
   address: [
     {
-      id: String,
       name: String,
       phone: String,
       province: String,
       district: String,
       ward: String,
       detail: String,
+      setDefault: {
+        type: Boolean,
+        default: false,
+      },
     },
   ],
   passwordChangedAt: Date,
@@ -68,6 +71,7 @@ const userSchema = new mongoose.Schema({
   },
   dateOfBirth: Date,
   gender: Number,
+  phone: String,
 });
 
 userSchema.pre("save", async function (next) {
