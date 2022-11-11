@@ -5,16 +5,19 @@ const reviewRouter = require("./../routes/reviewRoutes");
 
 const router = express.Router();
 
-router.use('/:productId/reviews', reviewRouter);
+router.use("/:productId/reviews", reviewRouter);
 router
   .route("/top-5-cheap")
   .get(productController.aliasTopProducts, productController.getAllProducts);
+router.route("/getTableProduct").get(productController.getTableProduct);
 router
   .route("/")
   .get(productController.getAllProducts)
   .post(
     authController.protect,
     authController.restrictTo("admin", "employee"),
+    productController.uploadProductImages,
+    productController.resizeProductImages,
     productController.createProduct
   );
 

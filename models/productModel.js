@@ -1,15 +1,17 @@
 const mongoose = require("mongoose");
-const slugify = require("slugify");
+const domPurifier = require("dompurify");
+const { JSDOM } = require("jsdom");
+const htmlPurify = domPurifier(new JSDOM().window);
 
 const productSchema = new mongoose.Schema(
   {
-    name: {
+    title: {
       type: String,
       required: [true, "A product must have a name"],
       unique: true,
       trim: true,
       maxlength: [
-        40,
+        100,
         "A product name must have less or equal then 40 characters",
       ],
       minlength: [
@@ -18,17 +20,11 @@ const productSchema = new mongoose.Schema(
       ],
       // validate: [validator.isAlpha, 'product name must only contain characters']
     },
-    title: {
-      type: String,
-      trim: true,
-      required: [true, "A product must have a title"],
-    },
-    slug: String,
     price: {
       type: Number,
       required: [true, "A product must have a price"],
     },
-    priceDiscount: {
+    promotion: {
       type: Number,
       validate: {
         validator: function (val) {
@@ -50,9 +46,7 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    imageCover: {
-      type: String,
-    },
+    eachRating: [Number],
     images: [String],
     createdAt: {
       type: Date,
@@ -63,12 +57,19 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    inventory:{
+      type: Number,
+      default: 0,
+    },
+    color: String,
     cpu: String,
     ram: String,
     os: String,
+    weight: Number,
     screen: String,
     graphicCard: String,
     battery: String,
+    demand: String,
     updatedAt: Date,
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -92,14 +93,21 @@ const productSchema = new mongoose.Schema(
 productSchema.index({ price: 1, ratingsAverage: -1 });
 productSchema.index({ slug: 1 });
 
-productSchema.virtual("discount").get(function () {
-  return (((this.price - this.priceDiscount) * 100) / this.price).toFixed();
+productSchema.virtual("percent").get(function () {
+  return (((this.price - this.promotion) * 100) / this.price).toFixed();
 });
 // Virtual populate
 productSchema.virtual("reviews", {
   ref: "Review",
   foreignField: "product",
   localField: "_id",
+});
+productSchema.pre("validate", function (next) {
+  //check if there is a description
+  if (this.description) {
+    this.description = htmlPurify.sanitize(this.description);
+  }
+  next();
 });
 productSchema.pre(/^find/, function (next) {
   this.populate({
@@ -117,12 +125,6 @@ productSchema.pre(/^find/, function (next) {
 
   next();
 });
-// DOCUMENT MIDDLEWARE: runs before .save() and .create()
-productSchema.pre("save", function (next) {
-  this.slug = slugify(this.name, { lower: true });
-  next();
-});
-
 
 const Product = mongoose.model("Product", productSchema);
 

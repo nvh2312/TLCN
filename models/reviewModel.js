@@ -52,6 +52,7 @@ reviewSchema.pre(/^find/, async function (next) {
 });
 
 reviewSchema.statics.calcAverageRatings = async function (productId) {
+  console.log(productId);
   const stats = await this.aggregate([
     {
       $match: { product: productId },
@@ -61,6 +62,31 @@ reviewSchema.statics.calcAverageRatings = async function (productId) {
         _id: "$product",
         nRating: { $sum: 1 },
         avgRating: { $avg: "$rating" },
+        fiveRating: {
+          $sum: {
+            $cond: [{ $eq: ["$rating", 5] }, 1, 0],
+          },
+        },
+        fourRating: {
+          $sum: {
+            $cond: [{ $eq: ["$rating", 4] }, 1, 0],
+          },
+        },
+        threeRating: {
+          $sum: {
+            $cond: [{ $eq: ["$rating", 3] }, 1, 0],
+          },
+        },
+        twoRating: {
+          $sum: {
+            $cond: [{ $eq: ["$rating", 2] }, 1, 0],
+          },
+        },
+        oneRating: {
+          $sum: {
+            $cond: [{ $eq: ["$rating", 1] }, 1, 0],
+          },
+        },
       },
     },
   ]);
@@ -70,11 +96,13 @@ reviewSchema.statics.calcAverageRatings = async function (productId) {
     await Product.findByIdAndUpdate(productId, {
       ratingsQuantity: stats[0].nRating,
       ratingsAverage: stats[0].avgRating,
+      eachRating: [Number(stats[0].oneRating),Number(stats[0].twoRating),Number(stats[0].threeRating),Number(stats[0].fourRating),Number(stats[0].fiveRating)]
     });
   } else {
     await Product.findByIdAndUpdate(productId, {
       ratingsQuantity: 0,
       ratingsAverage: 4.5,
+      eachRating: [0, 0, 0, 0, 0],
     });
   }
 };

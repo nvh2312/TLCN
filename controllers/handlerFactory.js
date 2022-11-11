@@ -6,12 +6,15 @@ const Review = require("./../models/reviewModel");
 
 exports.deleteOne = (Model) =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.findByIdAndDelete(req.params.id);
 
+
+    const doc = await Model.findByIdAndDelete(req.params.id);
     if (!doc) {
       return next(new AppError("No document found with that ID", 404));
     }
-
+    if (Model == Review) {
+      Model.calcAverageRatings(doc.product)
+    }
     res.status(204).json({
       status: "success",
       data: null,
@@ -24,25 +27,14 @@ exports.updateOne = (Model) =>
       req.body.updatedBy = req.user.id;
       req.body.updatedAt = Date.now() - 1000;
     }
-    if (Model == Review) {
-      let review = await Model.findById(req.params.id);
-      if (!review) {
-        return next(new AppError("No document found with that ID", 404));
-      }
-      if (req.body.rating) review.rating = req.body.rating;
-      if (req.body.star) review.review = req.body.review;
-      review.save();
-      res.status(200).json({
-        status: "success",
-        data: {
-          data: review,
-        },
-      });
-    }
+    
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
+    if (Model == Review) {
+      Model.calcAverageRatings(doc.product)
+    }
 
     if (!doc) {
       return next(new AppError("No document found with that ID", 404));
@@ -61,6 +53,7 @@ exports.createOne = (Model) =>
     if (Model == Product) {
       req.body.createdBy = req.user.id;
     }
+    console.log(req.body);
     const doc = await Model.create(req.body);
     res.status(201).json({
       status: "success",
@@ -108,5 +101,38 @@ exports.getAll = (Model) =>
       data: {
         data: doc,
       },
+    });
+  });
+exports.getTable = (Model) =>
+  catchAsync(async (req, res, next) => {
+    let searchStr = req.query.search["value"];
+    if (searchStr) {
+      const regex = new RegExp(searchStr);
+      searchStr = { $or: [{ name: regex }] };
+    } else {
+      searchStr = {};
+    }
+    Model.count({}, function (err, c) {
+      const recordsTotal = c;
+      Model.count(searchStr, function (err, c) {
+        const recordsFiltered = c;
+        Model.find(
+          searchStr,
+          "",
+          { skip: Number(req.query.start), limit: Number(req.query.length) },
+          function (err, results) {
+            if (err) {
+              return;
+            }
+            const data = {
+              draw: req.query.draw,
+              recordsFiltered: recordsFiltered,
+              recordsTotal: recordsTotal,
+              data: results,
+            };
+            res.status(200).json(data);
+          }
+        );
+      });
     });
   });
