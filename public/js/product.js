@@ -1,3 +1,4 @@
+const err_src = "/images/unnamed.jpg";
 const loadData = async () => {
   try {
     // const arr = ["_id", "name", "price", "slug"];
@@ -30,15 +31,22 @@ const loadData = async () => {
       },
       columns: [
         {
-          data: "_id",
+          data: "images",
           render: function (data) {
-            return '<div class= "my-3">' + data + "</div>";
+            return (
+              `<img src="` +
+              data[0] +
+              `" alt=""height="65" width="65" onerror="this.src='` +
+              err_src +
+              `';" style="border-radius: 0.275rem;" >`
+            );
           },
         },
         {
-          data: "name",
+          data: "title",
           render: function (data) {
-            return '<div class= "my-3">' + data + "</div>";
+            const value = data.length > 39 ? data.slice(0, 40) : data;
+            return '<div class= "my-3">' + value + "</div>";
           },
         },
 
@@ -49,14 +57,22 @@ const loadData = async () => {
           },
         },
         {
-          data: "slug",
-          render: function (data) {
-            return '<div class= "my-3">' + data + "</div>";
+          data: null,
+          render: function (row) {
+            let btnEdit =
+              '<button type="button" class="btn btn-primary btn-sm mr-1 edit" data-id="' +
+              row.id +
+              '"><i class="fa fa-edit"></i></button>';
+            let btnDelete =
+              '<button type="button" class="btn btn-danger btn-sm delete" data-id="' +
+              row.id +
+              '"><i class="fa fa-trash-alt"></i></button></div>';
+            return `<div class= "my-3">${btnEdit}${btnDelete}</div>`;
           },
         },
       ],
     });
-    
+
     showAlert("success", "Load Data successfully!");
   } catch (err) {
     showAlert("error", err);
@@ -68,9 +84,6 @@ const loadCategory = function () {
     method: "GET",
     success: (data) => {
       $("#category").empty();
-      $("#category").append(
-        "<option selected disabled hidden></option>"
-      );
       data.data.data.forEach((value) => {
         $("#category").append(
           "<option value=" + value.id + ">" + value.name + "</option>"
@@ -85,9 +98,6 @@ const loadBrand = function () {
     method: "GET",
     success: (data) => {
       $("#brand").empty();
-      $("#brand").append(
-        "<option selected disabled hidden></option>"
-      );
       data.data.data.forEach((value) => {
         $("#brand").append(
           "<option value=" + value.id + ">" + value.name + "</option>"
@@ -96,27 +106,85 @@ const loadBrand = function () {
     },
   });
 };
-const showModal = function () {
-  $("label").remove(".error");
-  loadCategory();
-  $("#dynamic_modal_title").text("Add Product");
-
-  $("#sample_form")[0].reset();
-  $("#category_product").empty();
-
-  $("#action").val("Add");
-
-  $("#action_button").text("Add");
-
-  $("#action_modal").modal("show");
-};
-
-
-$(document).ready(function() {
+function reloadData() {
+  $("#sample_data").DataTable().ajax.reload();
+}
+$(document).ready(function () {
+  $("select").select2({
+    theme: "bootstrap-5",
+  });
   loadData();
   loadCategory();
   loadBrand();
-})
-$(add_data).click(function() {
-  showModal();
-})
+  $(".navbar-nav li").removeClass("active");
+  // $(".nav-item")[0].addClass('active');
+  $(".navbar-nav li")[3].className = "nav-item active";
+  console.log($(".navbar-nav li")[0]);
+});
+$("#add_data").click(function () {
+  $("#dynamic_modal_title").text("Add Product");
+  $("#sample_form")[0].reset();
+  $("#action").val("Add");
+  $("#id").val("");
+
+  $("#action_button").text("Add");
+  $(".img-show").empty();
+  $("#action_modal").modal("show");
+});
+$(document).on("click", ".edit", function () {
+  const id = $(this).data("id");
+
+  $("#dynamic_modal_title").text("Edit Product");
+
+  $("#action").val("Edit");
+
+  $("#action_button").text("Edit");
+
+  $("#action_modal").modal("show");
+  $(".mb-2").hide();
+  $(".img-show").empty();
+  $(".edit-show").show();
+
+  $.ajax({
+    url: `/api/v1/products/${id}`,
+    method: "GET",
+    success: function (data) {
+      const product = data.data.data;
+      $("#id").val(id);
+      $("#title").val(product.title);
+      $("#category").val(product.category.id).trigger("change");
+      $("#brand").val(product.brand.id).trigger("change");
+      $("#demand").val(product.demand).trigger("change");
+      $("#color").val(product.color).trigger("change");
+      $("#price").val(product.price);
+      $("#promotion").val(product.promotion);
+      $("#weight").val(product.weight);
+      $("#ram").val(product.ram);
+      $("#battery").val(product.battery);
+      $("#cpu").val(product.cpu);
+      $("#os").val(product.os);
+      $("#screen").val(product.screen);
+      $("#graphicCard").val(product.graphicCard);
+
+      tinymce.get("description").setContent(product.description);
+    },
+  });
+});
+$(document).on("click", ".delete", function () {
+  const id = $(this).data("id");
+
+  if (confirm("Are you sure you want to delete this data?")) {
+    try {
+      $.ajax({
+        url: `/api/v1/products/${id}`,
+        method: "delete",
+        success: function (data) {
+          showAlert("success", `Delete Product ${id} Successfully`);
+          reloadData();
+        },
+      });
+    } catch (error) {
+      return showAlert("error", error.responseJSON.message);
+    }
+  }
+});

@@ -75,20 +75,63 @@ const addProduct = async (data) => {
       data,
       processData: false,
       contentType: false,
+      beforeSend: function () {
+        $("#action_button").attr("disabled", "disabled");
+      },
       success: (data) => {
+        $("#action_button").attr("disabled", false);
+        $("#action_modal").modal("hide");
+        reloadData();
         showAlert("success", "Add Product successfully!");
-        window.setTimeout(() => {
-          location.assign("/");
-        }, 1500);
       },
     });
   } catch (error) {
+    $("#action_button").attr("disabled", false);
+    return showAlert("error", error.responseJSON.message);
+  }
+};
+const editProduct = async (data) => {
+  try {
+    const id = $("#id").val();
+    await $.ajax({
+      url: `/api/v1/products/${id}`,
+      method: "patch",
+      data,
+      processData: false,
+      contentType: false,
+      beforeSend: function () {
+        $("#action_button").attr("disabled", "disabled");
+      },
+      success: (data) => {
+        $("#action_button").attr("disabled", false);
+        $("#action_modal").modal("hide");
+        reloadData();
+        showAlert("success", "Edit Product successfully!");
+      },
+    });
+  } catch (error) {
+    $("#action_button").attr("disabled", false);
     return showAlert("error", error.responseJSON.message);
   }
 };
 $("#sample_form").on("submit", async (e) => {
   e.preventDefault();
-  tinyMCE.triggerSave();
-  let form_data = new FormData($("form")[0]);
-  addProduct(form_data);
+  const action = $("#action").val();
+  if (action === "Add") {
+    tinyMCE.triggerSave();
+    let form_data = new FormData($("form")[0]);
+    addProduct(form_data);
+  } else {
+    // tinyMCE.triggerSave();
+    // const data = {
+    //   title: $("#title").val(),
+    //   price: $("#price").val(),
+    //   promotion: $("#promotion").val(),
+    //   weight: $("#weight").val(),
+    //   description: tinymce.get("description").getContent({ format: "raw" }),
+    // };
+    tinyMCE.triggerSave();
+    let form_data = new FormData($("form")[0]);
+    editProduct(form_data);
+  }
 });

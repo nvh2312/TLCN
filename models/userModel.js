@@ -69,8 +69,8 @@ const userSchema = new mongoose.Schema({
     enum: ["active", "verify", "ban"],
     default: "verify",
   },
-  dateOfBirth: Date,
-  gender: Number,
+  dateOfBirth: String,
+  gender: String,
   phone: String,
 });
 

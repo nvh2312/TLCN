@@ -85,6 +85,7 @@ exports.createAddress = catchAsync(async (req, res) => {
   res.status(200).json({
     status: "success",
     message: "You have already added address successfully.",
+    data: user,
   });
 });
 exports.updateAddress = catchAsync(async (req, res) => {
@@ -111,6 +112,7 @@ exports.updateAddress = catchAsync(async (req, res) => {
   res.status(500).json({
     status: "error",
     message: "This data is not exist. Please try again!!!",
+    data: user,
   });
 });
 exports.deleteAddress = catchAsync(async (req, res) => {
@@ -128,6 +130,7 @@ exports.deleteAddress = catchAsync(async (req, res) => {
     return res.status(200).json({
       status: "success",
       message: "Delete address successfully.",
+      data: user,
     });
   }
   res.status(500).json({
@@ -142,7 +145,7 @@ exports.setDefaultAddress = catchAsync(async (req, res) => {
   if (address.length > index) {
     const current = address.findIndex((value) => value.setDefault == true);
     address[index].setDefault = true;
-    console.log(address[index])
+    console.log(address[index]);
     address[current].setDefault = false;
     user.address = address;
     console.log(address);
@@ -150,6 +153,7 @@ exports.setDefaultAddress = catchAsync(async (req, res) => {
     return res.status(200).json({
       status: "success",
       message: "Set default address successfully.",
+      data: user,
     });
   }
   res.status(500).json({

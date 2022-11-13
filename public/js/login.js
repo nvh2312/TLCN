@@ -10,10 +10,16 @@ $("#login").click(async function (e) {
       method: "post",
       data,
       success: (data) => {
-        showAlert("success", "Login successfully!");
-        window.setTimeout(() => {
-          location.assign("/");
-        }, 1500);
+        if(data.data.user.role=="admin"){
+          showAlert("success", "Login successfully!");
+          window.setTimeout(() => {
+            location.assign("/products");
+          }, 1500);
+        }
+        else{
+          showAlert("error", "Tài khoản của bạn không có quyền truy cập!");
+        } 
+
         
       },
     });

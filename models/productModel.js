@@ -102,7 +102,7 @@ productSchema.virtual("reviews", {
   foreignField: "product",
   localField: "_id",
 });
-productSchema.pre("validate", function (next) {
+productSchema.pre("create", function (next) {
   //check if there is a description
   if (this.description) {
     this.description = htmlPurify.sanitize(this.description);

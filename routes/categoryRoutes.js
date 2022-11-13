@@ -16,6 +16,7 @@ router
 
 router
   .route("/:id")
+  .get(categoryController.getCategory)
   .patch(
     authController.restrictTo("employee", "admin"),
     categoryController.updateCategory

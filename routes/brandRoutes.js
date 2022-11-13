@@ -16,6 +16,7 @@ router
 
 router
   .route("/:id")
+  .get(brandController.getBrand)
   .patch(
     authController.restrictTo("employee", "admin"),
     brandController.updateBrand

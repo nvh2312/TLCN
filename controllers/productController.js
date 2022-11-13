@@ -4,17 +4,17 @@ const factory = require("./handlerFactory");
 const AppError = require("./../utils/appError");
 const cloudinary = require("../utils/cloudinary");
 const upload = require("../utils/multer");
-const multer = require('multer')
+const multer = require("multer");
 
 const uploadFiles = upload.fields([{ name: "images", maxCount: 5 }]);
 exports.uploadProductImages = (req, res, next) => {
   uploadFiles(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       if (err.code === "LIMIT_UNEXPECTED_FILE") {
-        return next(new AppError("Too many files to upload.", 400),false);
+        return next(new AppError("Too many files to upload.", 400), false);
       }
     } else if (err) {
-      return next(new AppError("Upload failed.", 400),false);
+      return next(new AppError("Upload failed.", 400), false);
     }
 
     next();
@@ -22,7 +22,7 @@ exports.uploadProductImages = (req, res, next) => {
 };
 
 exports.resizeProductImages = catchAsync(async (req, res, next) => {
-  if (!req.files.images) return next();
+  if (req.files === undefined || !req.files.images) return next();
   req.body.images = [];
   await Promise.all(
     req.files.images.map(async (file, i) => {

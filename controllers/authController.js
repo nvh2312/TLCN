@@ -224,11 +224,34 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
+exports.isLoggedIn = async (req, res, next) => {
+  if (req.cookies.jwt) {
+    try {
+      // 1) verify token
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+
+      // 2) Check if user still exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next();
+      }
+      // THERE IS A LOGGED IN USER
+      res.locals.user = currentUser;
+      return next();
+    } catch (err) {
+      return next();
+    }
+  }
+  next();
+};
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     // roles ['admin', 'employee',[user]]. role='user'
-    if (!roles.includes(req.user.role)) {
+    if (req.user == undefined || !roles.includes(req.user.role)) {
       return next(
         new AppError("You do not have permission to perform this action", 403)
       );
@@ -240,8 +263,10 @@ exports.isOwner = catchAsync(async (req, res, next) => {
   // 1) Get review id from param and findById to get review information
   const review = await Review.findById(req.params.id);
   // 2) if user is owner, allow to update or delete data
-  if(req.user.id != review.user.id){
-    return next(new AppError("You do not have permission to perform this action", 403));
+  if (req.user.id != review.user.id) {
+    return next(
+      new AppError("You do not have permission to perform this action", 403)
+    );
   }
   next();
 });

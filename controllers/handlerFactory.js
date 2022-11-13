@@ -6,14 +6,12 @@ const Review = require("./../models/reviewModel");
 
 exports.deleteOne = (Model) =>
   catchAsync(async (req, res, next) => {
-
-
     const doc = await Model.findByIdAndDelete(req.params.id);
     if (!doc) {
       return next(new AppError("No document found with that ID", 404));
     }
     if (Model == Review) {
-      Model.calcAverageRatings(doc.product)
+      Model.calcAverageRatings(doc.product);
     }
     res.status(204).json({
       status: "success",
@@ -26,14 +24,32 @@ exports.updateOne = (Model) =>
     if (Model == Product) {
       req.body.updatedBy = req.user.id;
       req.body.updatedAt = Date.now() - 1000;
+      req.body.description = req.body.description
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">");
+      if (req.body.promotion >= req.body.price)
+        return next(new AppError("Giá giảm phải nhỏ hơn giá gốc", 500));
+      const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+        runValidators: false,
+      });
+      if (!doc) {
+        return next(new AppError("No document found with that ID", 404));
+      }
+
+      res.status(200).json({
+        status: "success",
+        data: {
+          data: doc,
+        },
+      });
     }
-    
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
     if (Model == Review) {
-      Model.calcAverageRatings(doc.product)
+      Model.calcAverageRatings(doc.product);
     }
 
     if (!doc) {
@@ -53,7 +69,7 @@ exports.createOne = (Model) =>
     if (Model == Product) {
       req.body.createdBy = req.user.id;
     }
-    console.log(req.body);
+    console.log(req.body)
     const doc = await Model.create(req.body);
     res.status(201).json({
       status: "success",
@@ -93,7 +109,41 @@ exports.getAll = (Model) =>
       .paginate();
     // const doc = await features.query.explain();
     const doc = await features.query;
+    let totalPage = 1;
 
+    if (Model == Review && req.params.productId) {
+      const more = await Product.findById(req.params.productId).populate({
+        path: "reviews",
+      });
+      const totalFilter = more.reviews.length;
+      if (req.query.page != undefined) {
+        totalPage = Math.ceil(totalFilter / Number(req.query.limit));
+      }
+      if (req.query.page > totalPage)
+        return next(new AppError("This page does not exist", 404));
+      return res.status(200).json({
+        status: "success",
+        data: {
+          data: doc,
+          results: doc.length,
+          ratingsQuantity: more.ratingsQuantity,
+          ratingsAverage: more.ratingsAverage,
+          eachRating: more.eachRating,
+          totalPage,
+        },
+      });
+    }
+
+    if (req.query.page != undefined) {
+      const filterModel = new APIFeatures(Model.find(filter), req.query)
+        .filter()
+        .sort()
+        .limitFields();
+      const filterData = await filterModel.query;
+      totalPage = Math.ceil(filterData.length / Number(req.query.limit));
+      if (req.query.page > totalPage)
+        return next(new AppError("This page does not exist", 404));
+    }
     // SEND RESPONSE
     res.status(200).json({
       status: "success",
@@ -101,6 +151,7 @@ exports.getAll = (Model) =>
       data: {
         data: doc,
       },
+      totalPage,
     });
   });
 exports.getTable = (Model) =>
@@ -108,7 +159,7 @@ exports.getTable = (Model) =>
     let searchStr = req.query.search["value"];
     if (searchStr) {
       const regex = new RegExp(searchStr);
-      searchStr = { $or: [{ name: regex }] };
+      searchStr = { $or: [{ title: regex }] };
     } else {
       searchStr = {};
     }
