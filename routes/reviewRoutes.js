@@ -20,12 +20,12 @@ router
   .get(reviewController.getReview)
   .patch(
     authController.restrictTo("user", "employee", "admin"),
-    authController.isOwner,
+    reviewController.isOwner,
     reviewController.updateReview
   )
   .delete(
     authController.restrictTo("user", "employee", "admin"),
-    authController.isOwner,
+    reviewController.isOwner,
     reviewController.deleteReview
   );
 

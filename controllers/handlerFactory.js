@@ -3,6 +3,7 @@ const AppError = require("./../utils/appError");
 const APIFeatures = require("./../utils/apiFeatures");
 const Product = require("./../models/productModel");
 const Review = require("./../models/reviewModel");
+const Order = require("./../models/orderModel");
 
 exports.deleteOne = (Model) =>
   catchAsync(async (req, res, next) => {
@@ -44,6 +45,15 @@ exports.updateOne = (Model) =>
         },
       });
     }
+    if (Model == Order && req.body.status == "Cancelled") {
+      const cart = req.order.cart;
+      for (const value of cart) {
+        console.log(value.product._id);
+        await Product.findByIdAndUpdate(value.product._id, {
+          $inc: { inventory: value.quantity },
+        });
+      }
+    }
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
@@ -69,7 +79,36 @@ exports.createOne = (Model) =>
     if (Model == Product) {
       req.body.createdBy = req.user.id;
     }
-    console.log(req.body)
+    if (Model == Order) {
+      const cart = req.body.cart;
+      for (const value of cart) {
+        const name =
+          value.product.title.length > 39
+            ? value.product.title.slice(0, 40)
+            : value.product.title;
+        const invent = await Product.findById(value.id);
+        if (value.quantity > invent.inventory) {
+          return next(
+            new AppError(`Số lượng hàng ${name} trong kho không đủ`, 500)
+          );
+        }
+      }
+
+      const doc = await Model.create(req.body);
+      for (const value of cart) {
+        await Product.findByIdAndUpdate(value.id, {
+          $inc: { inventory: -value.quantity },
+        });
+      }
+
+      return res.status(201).json({
+        status: "success",
+        data: {
+          id: doc.id,
+          totalPrice: doc.totalPrice,
+        },
+      });
+    }
     const doc = await Model.create(req.body);
     res.status(201).json({
       status: "success",
@@ -186,4 +225,19 @@ exports.getTable = (Model) =>
         );
       });
     });
+  });
+exports.checkPermission = (Model) =>
+  catchAsync(async (req, res, next) => {
+    // 1) Get review id from param and findById to get review information
+    const doc = await Model.findById(req.params.id);
+    // 2) if user is owner, allow to update or delete data
+    if (req.user.id != doc.user._id && req.user.role == "user") {
+      return next(
+        new AppError("You do not have permission to perform this action", 403)
+      );
+    }
+    if (Model == Order) {
+      req.order = doc;
+    }
+    next();
   });

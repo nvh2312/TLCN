@@ -45,7 +45,7 @@ const loadData = async () => {
         {
           data: "title",
           render: function (data) {
-            const value = data.length > 39 ? data.slice(0, 40) : data;
+            const value = data.length > 39 ? (data.slice(0, 40)+"...") : data;
             return '<div class= "my-3">' + value + "</div>";
           },
         },
