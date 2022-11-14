@@ -119,7 +119,6 @@ $(document).ready(function () {
   $(".navbar-nav li").removeClass("active");
   // $(".nav-item")[0].addClass('active');
   $(".navbar-nav li")[3].className = "nav-item active";
-  console.log($(".navbar-nav li")[0]);
 });
 $("#add_data").click(function () {
   $("#dynamic_modal_title").text("Add Product");
@@ -129,6 +128,8 @@ $("#add_data").click(function () {
 
   $("#action_button").text("Add");
   $(".img-show").empty();
+  $(".mb-2").show();
+
   $("#action_modal").modal("show");
 });
 $(document).on("click", ".edit", function () {

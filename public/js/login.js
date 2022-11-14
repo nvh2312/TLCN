@@ -10,20 +10,18 @@ $("#login").click(async function (e) {
       method: "post",
       data,
       success: (data) => {
-        if(data.data.user.role=="admin"){
+        if (data.data.user.role == "admin") {
           showAlert("success", "Login successfully!");
           window.setTimeout(() => {
             location.assign("/products");
           }, 1500);
-        }
-        else{
+        } else {
           showAlert("error", "Tài khoản của bạn không có quyền truy cập!");
-        } 
-
-        
+        }
       },
     });
   } catch (error) {
-    showAlert("error",error.responseJSON.message);
+    showAlert("error", error.responseJSON.message);
   }
 });
+

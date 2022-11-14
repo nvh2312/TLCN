@@ -22,6 +22,7 @@ const reviewSchema = new mongoose.Schema(
       ref: "Product",
       required: [true, "Review must belong to a product."],
     },
+    updateAt: Date,
     user: {
       type: mongoose.Schema.ObjectId,
       ref: "User",
@@ -86,22 +87,31 @@ reviewSchema.statics.calcAverageRatings = async function (productId) {
             $cond: [{ $eq: ["$rating", 1] }, 1, 0],
           },
         },
+        reviews: { $push: "$$ROOT" },
       },
     },
   ]);
-  // console.log(stats);
+  console.log(stats);
 
   if (stats.length > 0) {
     await Product.findByIdAndUpdate(productId, {
       ratingsQuantity: stats[0].nRating,
       ratingsAverage: stats[0].avgRating,
-      eachRating: [Number(stats[0].oneRating),Number(stats[0].twoRating),Number(stats[0].threeRating),Number(stats[0].fourRating),Number(stats[0].fiveRating)]
+      eachRating: [
+        Number(stats[0].oneRating),
+        Number(stats[0].twoRating),
+        Number(stats[0].threeRating),
+        Number(stats[0].fourRating),
+        Number(stats[0].fiveRating),
+      ],
+      review: stats[0].reviews,
     });
   } else {
     await Product.findByIdAndUpdate(productId, {
       ratingsQuantity: 0,
       ratingsAverage: 4.5,
       eachRating: [0, 0, 0, 0, 0],
+      review: [],
     });
   }
 };

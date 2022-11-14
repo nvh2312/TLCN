@@ -57,7 +57,7 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    inventory:{
+    inventory: {
       type: Number,
       default: 0,
     },
@@ -83,6 +83,7 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
     },
+    review: [Array],
   },
   {
     toJSON: { virtuals: true },
@@ -91,8 +92,7 @@ const productSchema = new mongoose.Schema(
 );
 
 productSchema.index({ price: 1, ratingsAverage: -1 });
-productSchema.index({ slug: 1 });
-
+productSchema.index({ "$**": "text" });
 productSchema.virtual("percent").get(function () {
   return (((this.price - this.promotion) * 100) / this.price).toFixed();
 });
@@ -122,7 +122,6 @@ productSchema.pre(/^find/, function (next) {
       path: "createdBy",
       select: "name",
     });
-
   next();
 });
 

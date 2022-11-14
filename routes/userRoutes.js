@@ -27,7 +27,7 @@ router.patch("/setDefaultAddress", userController.setDefaultAddress);
 router.patch("/deleteAddress", userController.deleteAddress);
 
 router.use(authController.restrictTo("admin"));
-
+router.route("/getTableUser").get(userController.getTableUser);
 router
   .route("/")
   .get(userController.getAllUsers)

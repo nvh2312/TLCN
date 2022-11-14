@@ -4,6 +4,7 @@ const APIFeatures = require("./../utils/apiFeatures");
 const Product = require("./../models/productModel");
 const Review = require("./../models/reviewModel");
 const Order = require("./../models/orderModel");
+const User = require("./../models/userModel");
 
 exports.deleteOne = (Model) =>
   catchAsync(async (req, res, next) => {
@@ -48,11 +49,13 @@ exports.updateOne = (Model) =>
     if (Model == Order && req.body.status == "Cancelled") {
       const cart = req.order.cart;
       for (const value of cart) {
-        console.log(value.product._id);
         await Product.findByIdAndUpdate(value.product._id, {
           $inc: { inventory: value.quantity },
         });
       }
+    }
+    if (Model == Review) {
+      req.body.updateAt = Date.now() - 1000;
     }
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -195,19 +198,20 @@ exports.getAll = (Model) =>
   });
 exports.getTable = (Model) =>
   catchAsync(async (req, res, next) => {
+    let filter = {};
     let searchStr = req.query.search["value"];
     if (searchStr) {
-      const regex = new RegExp(searchStr);
-      searchStr = { $or: [{ title: regex }] };
-    } else {
-      searchStr = {};
+      // filter.push({ title: regex });
+      filter["$text"] = { $search: searchStr };
     }
+    if (Model == User) filter["role"] = { $ne: "admin" };
+
     Model.count({}, function (err, c) {
       const recordsTotal = c;
-      Model.count(searchStr, function (err, c) {
+      Model.count(filter, function (err, c) {
         const recordsFiltered = c;
         Model.find(
-          searchStr,
+          filter,
           "",
           { skip: Number(req.query.start), limit: Number(req.query.length) },
           function (err, results) {

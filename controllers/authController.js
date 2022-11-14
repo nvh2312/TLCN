@@ -96,7 +96,6 @@ const sendVerifyToken = catchAsync(async (user, statusCode, res) => {
       subject: "verify User",
       message,
     });
-
     res.status(statusCode).json({
       status: "success",
       token,

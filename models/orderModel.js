@@ -57,6 +57,8 @@ const orderSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+orderSchema.index({'$**': 'text'});
+
 const Order = mongoose.model("Order", orderSchema);
 
 module.exports = Order;
