@@ -57,6 +57,15 @@ const orderSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+orderSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "user",
+    select: "name",
+  })
+   
+  next();
+});
 orderSchema.index({'$**': 'text'});
 
 const Order = mongoose.model("Order", orderSchema);

@@ -14,7 +14,7 @@ router
     reviewController.setProductUserIds,
     reviewController.createReview
   );
-
+router.route("/getTableReview").get(reviewController.getTableReview);
 router
   .route("/:id")
   .get(reviewController.getReview)

@@ -100,6 +100,7 @@ exports.updateAddress = catchAsync(async (req, res) => {
       district: req.body.district,
       ward: req.body.ward,
       detail: req.body.detail,
+      setDefault: req.body.setDefault,
     };
     arr[id] = data;
     user.address = arr;
@@ -143,12 +144,14 @@ exports.setDefaultAddress = catchAsync(async (req, res) => {
   const address = user.address;
   const index = req.body.id;
   if (address.length > index) {
-    const current = address.findIndex((value) => value.setDefault == true);
+    console.log(index);
+    const current = await address.findIndex(
+      (value) => value.setDefault == true
+    );
+    console.log(current);
     address[index].setDefault = true;
-    console.log(address[index]);
     address[current].setDefault = false;
     user.address = address;
-    console.log(address);
     await user.save({ validateBeforeSave: false });
     return res.status(200).json({
       status: "success",

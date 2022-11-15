@@ -18,6 +18,7 @@ exports.checkStatusOrder = catchAsync(async (req, res, next) => {
   }
   next();
 });
+exports.getTableOrder = factory.getTable(Order);
 exports.createOrder = factory.createOne(Order);
 exports.getOrder = factory.getOne(Order);
 exports.getAllOrders = factory.getAll(Order);

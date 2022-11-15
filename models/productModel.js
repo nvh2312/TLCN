@@ -94,7 +94,9 @@ const productSchema = new mongoose.Schema(
 productSchema.index({ price: 1, ratingsAverage: -1 });
 productSchema.index({ "$**": "text" });
 productSchema.virtual("percent").get(function () {
-  return (((this.price - this.promotion) * 100) / this.price).toFixed();
+  return !this.promotion
+    ? 0
+    : Number((((this.price - this.promotion) * 100) / this.price).toFixed());
 });
 // Virtual populate
 productSchema.virtual("reviews", {

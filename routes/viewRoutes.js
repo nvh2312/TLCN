@@ -5,29 +5,32 @@ const viewController = require("../controllers/viewController");
 
 const router = express.Router();
 router.use(authController.isLoggedIn);
-router.get("/login",viewController.alreadyLoggedIn, (req, res, next) => {
+router.get("/login", viewController.alreadyLoggedIn, (req, res, next) => {
   res.status(200).render("login");
 });
 router.use(viewController.errorPage);
 
-router.get("/users",(req, res, next) => {
+router.get("/users", (req, res, next) => {
   res.status(200).render("user");
 });
-router.get("/products",(req, res, next) => {
+router.get("/products", (req, res, next) => {
   res.status(200).render("product");
 });
-router.get("/orders",(req, res, next) => {
+router.get("/orders", (req, res, next) => {
   res.status(200).render("order");
 });
-router.get("/brands",(req, res, next) => {
+router.get("/orders/:id", (req, res, next) => {
+  const id = req.params.id;
+  res.status(200).render("orderDetail");
+});
+router.get("/brands", (req, res, next) => {
   res.status(200).render("brand");
 });
-router.get("/categories",(req, res, next) => {
+router.get("/categories", (req, res, next) => {
   res.status(200).render("category");
 });
-router.get("/reviews",(req, res, next) => {
+router.get("/reviews", (req, res, next) => {
   res.status(200).render("review");
 });
-
 
 module.exports = router;

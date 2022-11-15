@@ -5,14 +5,37 @@ const loadData = async () => {
       serverSide: true,
       serverMethod: "get",
       ajax: {
-        url: "api/v1/categories/getTableCategory",
+        url: "api/v1/reviews/getTableReview",
       },
       columns: [
         {
-          data: "name",
+          data: "user",
           render: function (data) {
-            const value = data.length > 39 ? data.slice(0, 40) + "..." : data;
-            return '<div class= "my-3">' + value + "</div>";
+            return '<div class= "my-3">' + data.name + "</div>";
+          },
+        },
+        {
+          data: "product",
+          render: function (data) {
+            return '<div class= "my-3">' + data + "</div>";
+          },
+        },
+        {
+          data: "review",
+          render: function (data) {
+            const value = data.length > 29 ? data.slice(0, 30) + "..." : data;
+            return `<div class= "my-3">${value}</div>`;
+          },
+        },
+        {
+          data: "rating",
+          render: function (data) {
+            let html = "";
+            for (let i = 0; i < 5; i++) {
+              if (i < data) html += '<i class="fas fa-star text-warning"></i>';
+              else html += '<i class="fas fa-star"></i>';
+            }
+            return '<div class= "my-3">' + html + "</div>";
           },
         },
         {
@@ -42,19 +65,10 @@ function reloadData() {
   $("#sample_data").DataTable().ajax.reload();
 }
 
-$("#add_data").click(function () {
-  $("#dynamic_modal_title").text("Add Category");
-  $("#sample_form")[0].reset();
-  $("#action").val("Add");
-  $("#id").val("");
-
-  $("#action_button").text("Add");
-  $("#action_modal").modal("show");
-});
 $(document).on("click", ".edit", function () {
   const id = $(this).data("id");
 
-  $("#dynamic_modal_title").text("Edit Category");
+  $("#dynamic_modal_title").text("Edit Review");
 
   $("#action").val("Edit");
 
@@ -62,12 +76,13 @@ $(document).on("click", ".edit", function () {
 
   $("#action_modal").modal("show");
   $.ajax({
-    url: `/api/v1/brands/${id}`,
+    url: `/api/v1/reviews/${id}`,
     method: "GET",
     success: function (data) {
-      const category = data.data.data;
-      $("#name").val(category.name);
-      $("#id").val(category._id);
+      const review = data.data.data;
+      $("#review").val(review.review);
+      $("#rating").val(review.rating).trigger("change");
+      $("#id").val(review._id);
     },
   });
 });
@@ -75,13 +90,13 @@ $(document).on("click", ".edit", function () {
 $(document).on("click", ".delete", function () {
   const id = $(this).data("id");
 
-  if (confirm("Are you sure you want to delete this Category?")) {
+  if (confirm("Are you sure you want to delete this Review?")) {
     try {
       $.ajax({
-        url: `/api/v1/categories/${id}`,
+        url: `/api/v1/reviews/${id}`,
         method: "delete",
         success: function (data) {
-          showAlert("success", `Delete category Successfully`);
+          showAlert("success", `Delete review Successfully`);
           reloadData();
         },
       });
@@ -93,15 +108,13 @@ $(document).on("click", ".delete", function () {
 
 $("#sample_form").on("submit", async (e) => {
   e.preventDefault();
-  const action = $("#action").val();
-  const method = action == "Add" ? "POST" : "PATCH";
-  const data = { name: $("#name").val() };
+  const data = { review: $("#review").val(), rating: $("#rating").val() };
   const id = $("#id").val();
-  const url = `/api/v1/categories/${id}`;
+  const url = `/api/v1/reviews/${id}`;
   try {
     await $.ajax({
       url,
-      method,
+      method: "patch",
       data,
       beforeSend: function () {
         $("#action_button").attr("disabled", "disabled");
@@ -109,7 +122,7 @@ $("#sample_form").on("submit", async (e) => {
       success: (data) => {
         $("#action_button").attr("disabled", false);
         $("#action_modal").modal("hide");
-        showAlert("success", `${action} Category successfully!`);
+        showAlert("success", `Edit Review successfully!`);
         reloadData();
       },
     });
@@ -125,5 +138,5 @@ $(document).ready(function () {
   });
   loadData();
   $(".navbar-nav li").removeClass("active");
-  $(".navbar-nav li")[6].className = "nav-item active";
+  $(".navbar-nav li")[4].className = "nav-item active";
 });
