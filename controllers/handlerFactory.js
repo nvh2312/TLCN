@@ -182,6 +182,7 @@ exports.getAll = (Model) =>
         .sort()
         .limitFields();
       const filterData = await filterModel.query;
+      
       totalPage = Math.ceil(filterData.length / Number(req.query.limit));
       if (req.query.page > totalPage)
         return next(new AppError("This page does not exist", 404));

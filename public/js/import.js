@@ -1,6 +1,7 @@
 const err_src = "/images/unnamed.jpg";
 let arr_product = [];
 let arr_invoice = [];
+let arr_stored = [];
 const loadData = async () => {
   try {
     $("#sample_data").DataTable({
@@ -93,8 +94,8 @@ async function loadProducts() {
 }
 
 $("#add_data").click(function () {
-  $("#order_items").empty();
-  $("#sample_form")[0].reset();
+  arr_invoice = [];
+  $("#invoice_items").val();
   $("#action").val("Add");
   $("#action_button").text("Add");
   $("#action_modal").modal("show");
@@ -102,33 +103,48 @@ $("#add_data").click(function () {
 
 $("#invoice_items").change(async function () {
   $(".list-item").empty();
-  arr_invoice = [];
-
-  $(this)
+  //   arr_invoice = [];
+  arr_stored = [];
+  await $(this)
     .val()
     .forEach(async (value, index) => {
       let data = await arr_product.find((item) => item._id == value);
       const name =
         data.title.length > 39 ? data.title.slice(0, 40) + "..." : data.title;
-      let html =
-        `<hr><div class="d-flex"><div class="col-md-2"><img src="` +
-        data.images[0] +
-        `" alt=""height="65" width="65" onerror="this.src='` +
-        err_src +
-        `';" style="border-radius: 0.275rem;" ></div><div class="col-md-5 product-name"><p class="mt-1">` +
-        name +
-        `</p></div><div class="col-md-2 quantity"><input id="` +
-        index +
-        `" type="number" value="1"class="form-control quantity-input" min="1" onchange="updateQuantity(this)"> </div><div class="col-md-3 price"><input class="form-control" type="number"></input></div> </div>`;
-      $(".list-item").append(html);
+
       const item = {
         id: value,
+        image: data.images[0],
         title: name,
         quantity: 1,
       };
-      arr_invoice.push(item);
+      arr_stored.push(item);
+      //   arr_invoice.push(item);
     });
+
+  await arr_stored.forEach(async (value, index) => {
+    const data = await arr_invoice.find((item) => item.id == value.id);
+    console.log(data);
+    if (data!= undefined) arr_stored[index] = data;
+    const quantity = arr_stored[index].quantity;
+    let html =
+      `<hr><div class="d-flex"><div class="col-md-2"><img src="` +
+      value.image +
+      `" alt=""height="65" width="65" onerror="this.src='` +
+      err_src +
+      `';" style="border-radius: 0.275rem;" ></div><div class="col-md-5 product-name"><p class="mt-1">` +
+      value.title +
+      `</p></div><div class="col-md-2 quantity"><input id="` +
+      index +
+      `" type="number" value="${quantity}"class="form-control quantity-input" min="1" onchange="updateQuantity(this)"> </div><div class="col-md-3 price"><input class="form-control" type="number"></input></div> </div>`;
+    $(".list-item").append(html);
+  });
+  arr_invoice = arr_stored;
 });
+function updateQuantity(value) {
+    arr_invoice[value.id].quantity = value.value;
+    console.log(arr_invoice);
+  }
 
 $(document).ready(async function () {
   $("select").select2({

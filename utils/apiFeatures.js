@@ -23,7 +23,7 @@ class APIFeatures {
         const sortBy = this.queryString.sort.split(',').join(' ');
         this.query = this.query.sort(sortBy);
       } else {
-        this.query = this.query.sort('-createdAt');
+        this.query = this.query.sort('-_id');
       }
   
       return this;
@@ -36,7 +36,6 @@ class APIFeatures {
       } else {
         this.query = this.query.select('-__v');
       }
-  
       return this;
     }
   
@@ -46,7 +45,6 @@ class APIFeatures {
       const skip = (page - 1) * limit;
   
       this.query = this.query.skip(skip).limit(limit);
-  
       return this;
     }
   }
