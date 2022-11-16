@@ -9,7 +9,9 @@ const importSchema = new mongoose.Schema(
     },
     invoice: [
       {
-        product: Object,
+        product: String,
+        image: String,
+        title: String,
         quantity: Number,
         price: Number,
       },

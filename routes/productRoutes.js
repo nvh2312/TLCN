@@ -29,11 +29,13 @@ router
     authController.restrictTo("admin", "employee"),
     productController.uploadProductImages,
     productController.resizeProductImages,
+    productController.deleteImageCloud,
     productController.updateProduct
   )
   .delete(
     authController.protect,
     authController.restrictTo("admin", "employee"),
+    productController.deleteImageCloud,
     productController.deleteProduct
   );
 

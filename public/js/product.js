@@ -121,6 +121,7 @@ $(document).ready(function () {
   $(".navbar-nav li")[3].className = "nav-item active";
 });
 $("#add_data").click(function () {
+  files=[];
   $("#dynamic_modal_title").text("Add Product");
   $("#sample_form")[0].reset();
   $("#action").val("Add");
@@ -133,6 +134,8 @@ $("#add_data").click(function () {
   $("#action_modal").modal("show");
 });
 $(document).on("click", ".edit", function () {
+  files=[];
+  $("#sample_form")[0].reset();
   const id = $(this).data("id");
 
   $("#dynamic_modal_title").text("Edit Product");

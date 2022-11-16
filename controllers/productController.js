@@ -25,12 +25,28 @@ exports.resizeProductImages = catchAsync(async (req, res, next) => {
   if (req.files === undefined || !req.files.images) return next();
   req.body.images = [];
   // await Promise.all(
-    // req.files.images.map(async (file, i) => {
-    for(const file of req.files.images){
-      const result = await cloudinary.uploader.upload(file.path);
-      req.body.images.push(result.url);
-    }
+  // req.files.images.map(async (file, i) => {
+  for (const file of req.files.images) {
+    const result = await cloudinary.uploader.upload(file.path);
+    req.body.images.push(result.url);
+  }
   // );
+  next();
+});
+exports.deleteImageCloud = catchAsync(async (req, res, next) => {
+  if (
+    req.body.action == "Edit" &&
+    (req.files === undefined || !req.files.images)
+  )
+    return next();
+  let product = await Product.findById(req.params.id);
+
+  // Delete image from cloudinary
+  await product.images.forEach(async (imageURL) => {
+    const getPublicId = imageURL.split("/").pop().split(".")[0];
+    await cloudinary.uploader.destroy(getPublicId);
+  });
+
   next();
 });
 exports.aliasTopProducts = (req, res, next) => {

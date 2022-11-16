@@ -24,9 +24,9 @@ const loadData = async () => {
             let html = "";
             data.forEach((value, index) => {
               const name =
-                value.product.title.length > 39
-                  ? value.product.title.slice(0, 40) + "..."
-                  : value.product.title;
+                value.title.length > 39
+                  ? value.title.slice(0, 40) + "..."
+                  : value.title;
               html += `<div class= "my-3"> ${name} </div>`;
             });
             return html;
@@ -94,9 +94,11 @@ async function loadProducts() {
 }
 
 $("#add_data").click(function () {
+  $("#dynamic_modal_title").text("Add Invoice");
   arr_invoice = [];
-  $("#invoice_items").val();
+  $("#invoice_items").val(null).trigger("change");
   $("#action").val("Add");
+  $("#id").val("");
   $("#action_button").text("Add");
   $("#action_modal").modal("show");
 });
@@ -109,42 +111,130 @@ $("#invoice_items").change(async function () {
     .val()
     .forEach(async (value, index) => {
       let data = await arr_product.find((item) => item._id == value);
-      const name =
-        data.title.length > 39 ? data.title.slice(0, 40) + "..." : data.title;
 
+      const price = Number(((data.price * 70) / 100).toFixed());
       const item = {
-        id: value,
+        product: value,
         image: data.images[0],
-        title: name,
+        title: data.title,
         quantity: 1,
+        price,
       };
       arr_stored.push(item);
       //   arr_invoice.push(item);
     });
 
   await arr_stored.forEach(async (value, index) => {
-    const data = await arr_invoice.find((item) => item.id == value.id);
-    console.log(data);
-    if (data!= undefined) arr_stored[index] = data;
+    const data = await arr_invoice.find(
+      (item) => item.product == value.product
+    );
+    if (data != undefined) arr_stored[index] = data;
     const quantity = arr_stored[index].quantity;
+    const name =
+      value.title.length > 39 ? value.title.slice(0, 40) + "..." : value.title;
     let html =
       `<hr><div class="d-flex"><div class="col-md-2"><img src="` +
       value.image +
       `" alt=""height="65" width="65" onerror="this.src='` +
       err_src +
       `';" style="border-radius: 0.275rem;" ></div><div class="col-md-5 product-name"><p class="mt-1">` +
-      value.title +
+      name +
       `</p></div><div class="col-md-2 quantity"><input id="` +
       index +
-      `" type="number" value="${quantity}"class="form-control quantity-input" min="1" onchange="updateQuantity(this)"> </div><div class="col-md-3 price"><input class="form-control" type="number"></input></div> </div>`;
+      `" type="number" value="${quantity}"class="form-control quantity-input" min="1" onchange="updateQuantity(this)"> </div><div class="col-md-3 price"> <p id="price` +
+      index +
+      `" class="my-2" >` +
+      value.price * quantity +
+      ` VND</p> </div> </div>`;
     $(".list-item").append(html);
   });
   arr_invoice = arr_stored;
 });
 function updateQuantity(value) {
-    arr_invoice[value.id].quantity = value.value;
-    console.log(arr_invoice);
+  const price = Number(
+    (
+      (arr_invoice[value.id].price * value.value) /
+      arr_invoice[value.id].quantity
+    ).toFixed()
+  );
+  arr_invoice[value.id].price = price;
+  arr_invoice[value.id].quantity = value.value;
+  $(`#price${value.id}`).html(`${price} VND`);
+}
+$(document).on("click", ".delete", function () {
+  const id = $(this).data("id");
+  if (confirm("Are you sure you want to delete this invoice?")) {
+    try {
+      $.ajax({
+        url: `/api/v1/imports/${id}`,
+        method: "delete",
+        success: function (data) {
+          showAlert("success", `Delete invoice Successfully`);
+          reloadData();
+        },
+      });
+    } catch (error) {
+      return showAlert("error", "Đã có lỗi xảy ra");
+    }
   }
+});
+$(document).on("click", ".edit", function () {
+  const id = $(this).data("id");
+
+  $("#dynamic_modal_title").text("Edit Invoice");
+
+  $("#action").val("Edit");
+
+  $("#action_button").text("Edit");
+
+  $("#action_modal").modal("show");
+  $.ajax({
+    url: `/api/v1/imports/${id}`,
+    method: "GET",
+    success: async function (data) {
+      const invoice = data.data.data;
+      let arr_id = [];
+      await invoice.invoice.forEach((value, index) => {
+        arr_id.push(value.product);
+      });
+      // arr_invoice =invoice.invoice;
+      await $("#invoice_items").val(arr_id).trigger("change");
+      $("#id").val(invoice._id);
+    },
+  });
+});
+
+$("#action_button").click(async function (e) {
+  e.preventDefault();
+  const id = $("#id").val();
+  // if (id == undefined) id = "";
+  let totalPrice = 0;
+  await arr_invoice.forEach(function (value, index) {
+    totalPrice += value.price;
+  });
+  const url = `api/v1/imports/${id}`;
+  const method = $("#action").val() == "Add" ? "POST" : "PATCH";
+  const invoice = JSON.stringify(arr_invoice);
+  try {
+    await $.ajax({
+      url,
+      method,
+      data: { invoice, totalPrice },
+      beforeSend: function () {
+        $("#action_button").attr("disabled", "disabled");
+      },
+      success: (data) => {
+        $("#action_button").attr("disabled", false);
+        $("#action_modal").modal("hide");
+        showAlert("success", `${$("#action").val()} Invoice successfully!`);
+        reloadData();
+      },
+    });
+  } catch (error) {
+    $("#action_button").attr("disabled", false);
+    return showAlert("error", error);
+  }
+});
 
 $(document).ready(async function () {
   $("select").select2({

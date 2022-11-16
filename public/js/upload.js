@@ -19,8 +19,7 @@ input.addEventListener("change", () => {
     if (file[i].type.split("/")[0] != "image") continue;
     if (!files.some((e) => e.name == file[i].name)) files.push(file[i]);
   }
-  console.log(file);
-  console.log($("input:file")[0].files)
+
   showImages();
 });
 
@@ -81,6 +80,7 @@ const addProduct = async (data) => {
       },
       success: (data) => {
         $("#action_button").attr("disabled", false);
+        $("#sample_form")[0].reset();
         $("#action_modal").modal("hide");
         reloadData();
         showAlert("success", "Add Product successfully!");
@@ -106,6 +106,7 @@ const editProduct = async (data) => {
       success: (data) => {
         $("#action_button").attr("disabled", false);
         $("#action_modal").modal("hide");
+        $("#sample_form")[0].reset();
         reloadData();
         showAlert("success", "Edit Product successfully!");
       },
@@ -117,22 +118,19 @@ const editProduct = async (data) => {
 };
 $("#sample_form").on("submit", async (e) => {
   e.preventDefault();
+  const dt = new DataTransfer();
+  files.forEach((file) => {
+    dt.items.add(file);
+  });
+  const newFileList = dt.files;
+  console.log(newFileList);
+  $("input:file")[0].files = newFileList;
+  tinyMCE.triggerSave();
+  let form_data = new FormData($("form")[0]);
   const action = $("#action").val();
   if (action === "Add") {
-    tinyMCE.triggerSave();
-    let form_data = new FormData($("form")[0]);
     addProduct(form_data);
   } else {
-    // tinyMCE.triggerSave();
-    // const data = {
-    //   title: $("#title").val(),
-    //   price: $("#price").val(),
-    //   promotion: $("#promotion").val(),
-    //   weight: $("#weight").val(),
-    //   description: tinymce.get("description").getContent({ format: "raw" }),
-    // };
-    tinyMCE.triggerSave();
-    let form_data = new FormData($("form")[0]);
     editProduct(form_data);
   }
 });
