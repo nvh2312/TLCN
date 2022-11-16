@@ -11361,7 +11361,7 @@ a:focus {
 }
 
 .sidebar .nav-item .nav-link .img-profile,
-.topbar .nav-item .nav-link .img-profile {
+.topbar .nav-item .img-profile {
   height: 2rem;
   width: 2rem;
 }
@@ -12615,4 +12615,9 @@ body.sidebar-toggled footer.sticky-footer {
 }
 .alert--error {
   background-color: #eb4d4b!important;
+}
+
+.border-status{
+  border: 1px solid #e3e6f0;
+  border-radius: 16px;
 }

@@ -192,8 +192,9 @@ exports.getAll = (Model) =>
       results: doc.length,
       data: {
         data: doc,
+        totalPage,
+        currentPage: req.query.page
       },
-      totalPage,
     });
   });
 exports.getTable = (Model) =>

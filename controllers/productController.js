@@ -24,13 +24,13 @@ exports.uploadProductImages = (req, res, next) => {
 exports.resizeProductImages = catchAsync(async (req, res, next) => {
   if (req.files === undefined || !req.files.images) return next();
   req.body.images = [];
-  await Promise.all(
-    req.files.images.map(async (file, i) => {
+  // await Promise.all(
+    // req.files.images.map(async (file, i) => {
+    for(const file of req.files.images){
       const result = await cloudinary.uploader.upload(file.path);
       req.body.images.push(result.url);
-    })
-  );
-
+    }
+  // );
   next();
 });
 exports.aliasTopProducts = (req, res, next) => {

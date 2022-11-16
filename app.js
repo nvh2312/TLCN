@@ -18,6 +18,7 @@ const categoryRouter = require("./routes/categoryRoutes");
 const brandRouter = require("./routes/brandRoutes");
 const reviewRouter = require("./routes/reviewRoutes");
 const orderRouter = require("./routes/orderRoutes");
+const importRouter = require("./routes/importRoutes");
 const viewRouter = require("./routes/viewRoutes");
 
 const app = express();
@@ -88,6 +89,7 @@ app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/brands", brandRouter);
 app.use("/api/v1/reviews", reviewRouter);
 app.use("/api/v1/orders", orderRouter);
+app.use("/api/v1/imports", importRouter);
 app.use("/", viewRouter);
 
 app.all("*", (req, res, next) => {

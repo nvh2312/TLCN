@@ -19,7 +19,8 @@ input.addEventListener("change", () => {
     if (file[i].type.split("/")[0] != "image") continue;
     if (!files.some((e) => e.name == file[i].name)) files.push(file[i]);
   }
-
+  console.log(file);
+  console.log($("input:file")[0].files)
   showImages();
 });
 

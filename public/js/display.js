@@ -19,6 +19,18 @@ window.onscroll = function () {
     myButton.css("display", "none");
   }
 };
-$(".scroll-to-top").on("click", function(){
-    window.scrollTo({ top: 0, behavior: "smooth" });
+$(".scroll-to-top").on("click", function () {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+$("#logout").click(function () {
+  $("#logoutModal").modal("show");
 })
+function logout() {
+  $.ajax({
+    url: "/api/v1/users/logout",
+    method: "GET",
+    success: () => {
+      window.location = "/login";
+    },
+  });
+}

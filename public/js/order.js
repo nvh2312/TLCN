@@ -39,17 +39,18 @@ const loadData = async () => {
         {
           data: "status",
           render: function (data) {
+            const value = data.length > 9 ? data.slice(0, 8) : data;
             let html = "";
             if (data == "Processed")
-              html = `<div class= "my-3"><button class="btn btn-warning" disabled>${data}</button></div>`;
+              html = `<div class= "my-3"><button class="btn btn-warning" disabled>${value}</button></div>`;
             if (data == "Cancelled")
-              html = `<div class= "my-3"><button class="btn btn-error" disabled>${data}</button></div>`;
+              html = `<div class= "my-3"><button class="btn btn-danger" disabled>${value}</button></div>`;
             if (data == "Waiting Goods")
-              html = `<div class= "my-3"><button class="btn btn-info" disabled>${data}</button></div>`;
+              html = `<div class= "my-3"><button class="btn btn-info" disabled>${value}</button></div>`;
             if (data == "Delivery")
-              html = `<div class= "my-3"><button class="btn btn-primary" disabled>${data}</button></div>`;
+              html = `<div class= "my-3"><button class="btn btn-primary" disabled>${value}</button></div>`;
             if (data == "Success")
-              html = `<div class= "my-3"><button class="btn btn-success" disabled>${data}</button></div>`;
+              html = `<div class= "my-3"><button class="btn btn-success" disabled>${value}</button></div>`;
             return html;
           },
         },
@@ -62,9 +63,7 @@ const loadData = async () => {
         {
           data: null,
           render: function (row) {
-            let btnView = `<a href="/orders/${row.id}"><button type="button" class="btn btn-primary btn-sm mr-1" data-id="' +
-              row.id +
-              '">View</button></a>`;
+            let btnView = `<a href="/orders/${row.id}"><button type="button" class="btn btn-primary btn-sm mr-1" >View</button></a>`;
 
             return `<div class= "my-3">${btnView}</div>`;
           },

@@ -1,7 +1,11 @@
 const express = require("express");
-const userController = require("../controllers/userController");
+// const AppError = require("./../utils/appError");
+// const catchAsync = require("./../utils/catchAsync");
+// const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
 const viewController = require("../controllers/viewController");
+const Order = require("../models/orderModel");
+const Import = require("../models/importModel");
 
 const router = express.Router();
 router.use(authController.isLoggedIn);
@@ -19,9 +23,44 @@ router.get("/products", (req, res, next) => {
 router.get("/orders", (req, res, next) => {
   res.status(200).render("order");
 });
-router.get("/orders/:id", (req, res, next) => {
-  const id = req.params.id;
-  res.status(200).render("orderDetail");
+router.get("/orders/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const data = await Order.findById(id);
+    let total = 0;
+    data.cart.forEach((value) => {
+      total += value.product.price * value.quantity;
+    });
+    data.total = total;
+    const theDate = new Date(Date.parse(data.createdAt));
+    const date = theDate.toLocaleString();
+    data.date = date;
+    data.discount = total - data.totalPrice;
+    res.status(200).render("orderDetail", { data });
+  } catch (error) {
+    res.status(200).render("404");
+  }
+});
+router.get("/imports", (req, res, next) => {
+  res.status(200).render("import");
+});
+router.get("/imports/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const data = await Import.findById(id);
+    let total = 0;
+    data.cart.forEach((value) => {
+      total += value.product.price * value.quantity;
+    });
+    data.total = total;
+    const theDate = new Date(Date.parse(data.createdAt));
+    const date = theDate.toLocaleString();
+    data.date = date;
+    data.discount = total - data.totalPrice;
+    res.status(200).render("importDetail", { data });
+  } catch (error) {
+    res.status(200).render("404");
+  }
 });
 router.get("/brands", (req, res, next) => {
   res.status(200).render("brand");
