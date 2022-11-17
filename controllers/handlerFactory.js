@@ -185,7 +185,6 @@ exports.getOne = (Model, popOptions) =>
 
 exports.getAll = (Model) =>
   catchAsync(async (req, res, next) => {
-    console.log(req.query)
     handleQuery(req,"price");
     handleQuery(req,"promotion");
     // To allow for nested GET reviews on tour (hack)
