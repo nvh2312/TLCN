@@ -4,10 +4,19 @@ const APIFeatures = require("./../utils/apiFeatures");
 const Product = require("./../models/productModel");
 const Review = require("./../models/reviewModel");
 const Order = require("./../models/orderModel");
+const Import = require("./../models/importModel");
 const User = require("./../models/userModel");
 
 exports.deleteOne = (Model) =>
   catchAsync(async (req, res, next) => {
+    if(Model==Import){
+      const invoice = await Model.findById(req.params.id);
+      await invoice.invoice.forEach(async (value, index) => {
+        await Product.findByIdAndUpdate(value.product, {
+          $inc: { inventory: -value.quantity },
+        });
+      });
+    }
     const doc = await Model.findByIdAndDelete(req.params.id);
     if (!doc) {
       return next(new AppError("No document found with that ID", 404));
@@ -15,6 +24,7 @@ exports.deleteOne = (Model) =>
     if (Model == Review) {
       Model.calcAverageRatings(doc.product);
     }
+    
     res.status(204).json({
       status: "success",
       data: null,
@@ -56,6 +66,20 @@ exports.updateOne = (Model) =>
     }
     if (Model == Review) {
       req.body.updateAt = Date.now() - 1000;
+    }
+    if (Model == Import) {
+      const invoice = await Model.findById(req.params.id);
+      await invoice.invoice.forEach(async (value, index) => {
+        await Product.findByIdAndUpdate(value.product, {
+          $inc: { inventory: -value.quantity },
+        });
+      });
+      const product = req.body.invoice;
+      for (const value of product) {
+        await Product.findByIdAndUpdate(value.product, {
+          $inc: { inventory: value.quantity },
+        });
+      }
     }
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -112,6 +136,15 @@ exports.createOne = (Model) =>
         },
       });
     }
+    if (Model == Import) {
+      const invoice = req.body.invoice;
+      for (const value of invoice) {
+        await Product.findByIdAndUpdate(value.product, {
+          $inc: { inventory: value.quantity },
+        });
+      }
+    }
+
     const doc = await Model.create(req.body);
     res.status(201).json({
       status: "success",
@@ -182,7 +215,7 @@ exports.getAll = (Model) =>
         .sort()
         .limitFields();
       const filterData = await filterModel.query;
-      
+
       totalPage = Math.ceil(filterData.length / Number(req.query.limit));
       if (req.query.page > totalPage)
         return next(new AppError("This page does not exist", 404));
@@ -194,7 +227,7 @@ exports.getAll = (Model) =>
       data: {
         data: doc,
         totalPage,
-        currentPage: req.query.page
+        currentPage: req.query.page,
       },
     });
   });

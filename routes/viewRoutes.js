@@ -48,15 +48,9 @@ router.get("/imports/:id", async (req, res, next) => {
   try {
     const id = req.params.id;
     const data = await Import.findById(id);
-    let total = 0;
-    data.cart.forEach((value) => {
-      total += value.product.price * value.quantity;
-    });
-    data.total = total;
     const theDate = new Date(Date.parse(data.createdAt));
     const date = theDate.toLocaleString();
     data.date = date;
-    data.discount = total - data.totalPrice;
     res.status(200).render("importDetail", { data });
   } catch (error) {
     res.status(200).render("404");

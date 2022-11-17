@@ -8,6 +8,9 @@ const loadData = async () => {
       processing: true,
       serverSide: true,
       serverMethod: "get",
+      columnDefs: [
+        { width: '40%', targets: 1 }
+    ],
       ajax: {
         url: "api/v1/imports/getTableImport",
       },
