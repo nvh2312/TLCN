@@ -7,9 +7,20 @@ const Order = require("./../models/orderModel");
 const Import = require("./../models/importModel");
 const User = require("./../models/userModel");
 
+function handleQuery(req,value) {
+  const obj = {};
+  if (req.query[value + "_lt"] != undefined) obj.lt = req.query[value + "_lt"];
+  if (req.query[value + "_lte"] != undefined)
+    obj.lte = req.query[value + "_lte"];
+  if (req.query[value + "_gt"] != undefined) obj.gt = req.query[value + "_gt"];
+  if (req.query[value + "_gte"] != undefined)
+    obj.gte = req.query[value + "_gte"];
+  if (JSON.stringify(obj) !== "{}") req.query[value] = obj;
+}
+
 exports.deleteOne = (Model) =>
   catchAsync(async (req, res, next) => {
-    if(Model==Import){
+    if (Model == Import) {
       const invoice = await Model.findById(req.params.id);
       await invoice.invoice.forEach(async (value, index) => {
         await Product.findByIdAndUpdate(value.product, {
@@ -24,7 +35,7 @@ exports.deleteOne = (Model) =>
     if (Model == Review) {
       Model.calcAverageRatings(doc.product);
     }
-    
+
     res.status(204).json({
       status: "success",
       data: null,
@@ -174,6 +185,9 @@ exports.getOne = (Model, popOptions) =>
 
 exports.getAll = (Model) =>
   catchAsync(async (req, res, next) => {
+    console.log(req.query)
+    handleQuery(req,"price");
+    handleQuery(req,"promotion");
     // To allow for nested GET reviews on tour (hack)
     let filter = {};
     if (req.params.productId) filter = { product: req.params.productId };

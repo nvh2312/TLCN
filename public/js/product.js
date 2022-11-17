@@ -45,7 +45,7 @@ const loadData = async () => {
         {
           data: "title",
           render: function (data) {
-            const value = data.length > 39 ? (data.slice(0, 40)+"...") : data;
+            const value = data.length > 39 ? data.slice(0, 40) + "..." : data;
             return '<div class= "my-3">' + value + "</div>";
           },
         },
@@ -109,7 +109,7 @@ const loadBrand = function () {
 function reloadData() {
   $("#sample_data").DataTable().ajax.reload();
 }
-$(document).ready(function () {
+$(document).ready(async function () {
   $("select").select2({
     theme: "bootstrap-5",
   });
@@ -121,7 +121,7 @@ $(document).ready(function () {
   $(".navbar-nav li")[3].className = "nav-item active";
 });
 $("#add_data").click(function () {
-  files=[];
+  files = [];
   $("#dynamic_modal_title").text("Add Product");
   $("#sample_form")[0].reset();
   $("#action").val("Add");
@@ -134,7 +134,7 @@ $("#add_data").click(function () {
   $("#action_modal").modal("show");
 });
 $(document).on("click", ".edit", function () {
-  files=[];
+  files = [];
   $("#sample_form")[0].reset();
   const id = $(this).data("id");
 
