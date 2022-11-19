@@ -10,17 +10,22 @@ class APIFeatures {
     excludedFields.forEach((el) => delete queryObj[el]);
     Object.keys(queryObj).forEach(function (key) {
       if (key != "price" && key != "promotion") {
-        queryObj[key] = { $in: queryObj[key].split(",") };
+        if (key != "keyword") {
+          queryObj[key] = { $in: queryObj[key].split(",") };
+        }
+        if ((key == "keyword")) {
+          queryObj["$text"] = { $search: queryObj[key] };
+          delete queryObj[key];
+        }
       }
     });
+    // console.log(queryObj);
     // queryObj.brand = { $in: queryObj.brand.split(",") };
     // Advanced filtering
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    console.log(queryObj.price);
 
     this.query = this.query.find(JSON.parse(queryStr));
-    console.log(JSON.parse(queryStr));
     return this;
   }
 

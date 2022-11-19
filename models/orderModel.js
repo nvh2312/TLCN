@@ -34,7 +34,7 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: [true, "An order must have a payment"],
       enum: {
-        values: ["tiền mặt", "ngân hàng"],
+        values: ["tiền mặt", "paypal"],
         message: "Phương thức thanh toán là tiền mặt hoặc ngân hàng",
       },
     },
@@ -51,6 +51,7 @@ const orderSchema = new mongoose.Schema(
       },
       default: "Processed",
     },
+    invoicePayment: Object,
   },
   {
     toJSON: { virtuals: true },
@@ -62,11 +63,11 @@ orderSchema.pre(/^find/, function (next) {
   this.populate({
     path: "user",
     select: "name",
-  })
-   
+  });
+
   next();
 });
-orderSchema.index({'$**': 'text'});
+orderSchema.index({ "$**": "text" });
 
 const Order = mongoose.model("Order", orderSchema);
 
