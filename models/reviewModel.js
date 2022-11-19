@@ -6,7 +6,7 @@ const reviewSchema = new mongoose.Schema(
   {
     review: {
       type: String,
-      required: [true, "Review can not be empty!"],
+      required: [true, "Đánh giá không thể để trống!"],
     },
     rating: {
       type: Number,
@@ -20,13 +20,13 @@ const reviewSchema = new mongoose.Schema(
     product: {
       type: mongoose.Schema.ObjectId,
       ref: "Product",
-      required: [true, "Review must belong to a product."],
+      required: [true, "Vui lòng cung cấp sản phẩm đánh giá."],
     },
     updateAt: Date,
     user: {
       type: mongoose.Schema.ObjectId,
       ref: "User",
-      required: [true, "Review must belong to a user"],
+      required: [true, "Đánh giá phải từ một người dùng nào đó"],
     },
   },
   {

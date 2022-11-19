@@ -88,7 +88,7 @@ const sendVerifyToken = catchAsync(async (user, statusCode, res) => {
   res.cookie("jwt", token, cookieOptions);
   // 3) Send it to user's email
   const verifyURL = `http://localhost:5173/verify`;
-  const message = `If you are owner account? go to this link and verify your account at:  ${verifyURL}.\nYour encode is: ${verifyToken}\n.If didn't you, please ignore this email!`;
+  const message = `Bạn là chủ tài khoản? Vui lòng xác nhận tài khoản tại:  ${verifyURL}.\nMã xác nhận: ${verifyToken}\n.Nếu không phải, vui lòng bỏ qua mail này!`;
   user.password = undefined;
   try {
     await sendEmail({
@@ -154,7 +154,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // 1) Check if email and password exist
   if (!email || !password) {
-    return next(new AppError("Please provide email and password!", 400));
+    return next(new AppError("Vui lòng cung cấp email và mật khẩu!", 400));
   }
   // 2) Check if user exists && password is correct
   const user = await User.findOne({ email }).select("+password");
@@ -163,7 +163,7 @@ exports.login = catchAsync(async (req, res, next) => {
     !user ||
     !(await user.correctPassword(password.toString(), user.password))
   ) {
-    return next(new AppError("Incorrect email or password", 401));
+    return next(new AppError("Email hoặc mật khẩu không chính xác", 401));
   }
   // 3) Check if user not verify, send code to gmail
   if (user.active == "verify") {
@@ -207,7 +207,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   if (!currentUser) {
     return next(
       new AppError(
-        "The user belonging to this token does no longer exist.",
+        "Token người dùng không còn tồn tại.",
         401
       )
     );
@@ -216,7 +216,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   // 4) Check if user changed password after the token was issued
   if (currentUser.changedPasswordAfter(decoded.iat)) {
     return next(
-      new AppError("User recently changed password! Please log in again.", 401)
+      new AppError("Tài khoản gần đây đã thay đổi mật khẩu! Xin vui lòng đăng nhập lại.", 401)
     );
   }
 
@@ -253,7 +253,7 @@ exports.restrictTo = (...roles) => {
     // roles ['admin', 'employee',[user]]. role='user'
     if (req.user == undefined || !roles.includes(req.user.role)) {
       return next(
-        new AppError("You do not have permission to perform this action", 403)
+        new AppError("Bạn không có quyền thực hiện", 403)
       );
     }
     next();
@@ -264,7 +264,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
-    return next(new AppError("There is no user with email address.", 404));
+    return next(new AppError("Tài khoản này không tồn tại. Vui lòng đăng ký để sử dụng", 404));
   }
 
   // 2) Generate the random reset token
@@ -276,7 +276,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     "host"
   )}/api/v1/users/resetPassword/${resetToken}`;
 
-  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
+  const message = `Bạn quên mật khẩu? Mã xác nhận của bạn: ${resetToken}.\nĐổi mật khẩu mới tại : ${resetURL}.\nNếu không phải bạn, vui lòng bỏ qua email này!`;
 
   try {
     await sendEmail({
@@ -296,7 +296,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     return next(
-      new AppError("There was an error sending the email. Try again later!"),
+      new AppError("Đã có lỗi xảy ra trong quá trình gửi mail. Vui lòng thực hiện lại sau!"),
       500
     );
   }
@@ -313,7 +313,7 @@ exports.verifyResetPass = catchAsync(async (req, res, next) => {
   });
   // 2) If token has not expired, and there is user, set the new password
   if (!user) {
-    return next(new AppError("Token is invalid or has expired", 400));
+    return next(new AppError("Token không hợp lệ hoặc đã hết hạn", 400));
   }
   res.status(200).json({
     status: "success",
@@ -329,7 +329,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   });
   // 2) If token has not expired, and there is user, set the new password
   if (!user) {
-    return next(new AppError("Token is invalid or has expired", 400));
+    return next(new AppError("oken không hợp lệ hoặc đã hết hạn", 400));
   }
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
@@ -348,7 +348,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
   // 2) Check if POSTed current password is correct
   if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
-    return next(new AppError("Your current password is wrong.", 401));
+    return next(new AppError("Mật khẩu hiện tại chưa chính xác.", 401));
   }
 
   // 3) If so, update password

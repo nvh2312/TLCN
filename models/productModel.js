@@ -7,22 +7,22 @@ const productSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: [true, "A product must have a name"],
+      required: [true, "Sản phẩm phải có tên phân biệt"],
       unique: true,
       trim: true,
       maxlength: [
         200,
-        "A product name must have less or equal then 200 characters",
+        "Tên sản phẩm tối đa 200 kí tự",
       ],
       minlength: [
         10,
-        "A product name must have more or equal then 10 characters",
+        "Tên sản phẩm tối thiểu 10 kí tự",
       ],
       // validate: [validator.isAlpha, 'product name must only contain characters']
     },
     price: {
       type: Number,
-      required: [true, "A product must have a price"],
+      required: [true, "Vui lòng cung cấp giá sản phẩm"],
     },
     promotion: {
       type: Number,
@@ -31,15 +31,15 @@ const productSchema = new mongoose.Schema(
           // this only points to current doc on NEW document creation
           return val < this.price;
         },
-        message: "Discount price ({VALUE}) should be below regular price",
+        message: "Giá giảm: ({VALUE}) phải nhỏ hơn giá gốc",
       },
     },
     description: String,
     ratingsAverage: {
       type: Number,
       default: 4.5,
-      min: [1, "Rating must be above 1.0"],
-      max: [5, "Rating must be below 5.0"],
+      min: [1, "Đánh giá từ 1 sao trở lên"],
+      max: [5, "Đánh giá tối đa 5 sao"],
       set: (val) => Math.round(val * 10) / 10, // 4.666666, 46.6666, 47, 4.7
     },
     ratingsQuantity: {

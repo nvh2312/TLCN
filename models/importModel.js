@@ -5,7 +5,7 @@ const importSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.ObjectId,
       ref: "User",
-      required: [true, "Import must belong to an admin or employee"],
+      required: [true, "Hóa đơn nhập hàng phải từ admin hoặc nhân viên"],
     },
     invoice: [
       {

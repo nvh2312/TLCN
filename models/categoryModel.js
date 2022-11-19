@@ -4,16 +4,16 @@ const categorySchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "A category must have a name"],
+      required: [true, "Thể loại sản phẩm phải có tên"],
       unique: true,
       trim: true,
       maxlength: [
         40,
-        "A category name must have less or equal then 40 characters",
+        "Thể loại sản phẩm tối đa 40 kí tự",
       ],
       minlength: [
         2,
-        "A category name must have more or equal then 3 characters",
+        "Thể loại sản phẩm tối thiểu cần 2 kí tự",
       ],
     },
     slug: String,

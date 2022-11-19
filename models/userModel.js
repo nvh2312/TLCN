@@ -6,14 +6,14 @@ const bcrypt = require("bcryptjs");
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Please tell us your name!"],
+    required: [true, "Vui lòng cung cấp tên!"],
   },
   email: {
     type: String,
-    required: [true, "Please provide your email"],
+    required: [true, "Vui lòng cung cấp email"],
     unique: true,
     lowercase: true,
-    validate: [validator.isEmail, "Please provide a valid email"],
+    validate: [validator.isEmail, "Vui lòng cung cấp mail chính xác"],
   },
   avatar: {
     type: String,
@@ -27,19 +27,19 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, "Please provide a password"],
+    required: [true, "Tài khoản cần có mật khẩu"],
     minlength: 8,
     select: false,
   },
   passwordConfirm: {
     type: String,
-    required: [true, "Please confirm your password"],
+    required: [true, "Vui lòng nhập lại mật khẩu"],
     validate: {
       // This only works on CREATE and SAVE!!!
       validator: function (el) {
         return el === this.password;
       },
-      message: "Passwords are not the same!",
+      message: "Nhập lại mật khẩu chưa đúng!",
     },
   },
   createdAt: {

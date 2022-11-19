@@ -3,14 +3,14 @@ const brandSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "A brand must have a name"],
+      required: [true, "Nhãn hiệu phải có tên"],
       unique: true,
       trim: true,
       maxlength: [
-        20,
-        "A brand name must have less or equal then 40 characters",
+        40,
+        "Nhãn hiệu tối đa 40 kí tự",
       ],
-      minlength: [2, "A brand name must have more or equal then 3 characters"],
+      minlength: [2, "Nhãn hiệu tối thiểu 2 kí tự"],
     },
   },
   {

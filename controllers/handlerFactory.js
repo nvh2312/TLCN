@@ -30,7 +30,7 @@ exports.deleteOne = (Model) =>
     }
     const doc = await Model.findByIdAndDelete(req.params.id);
     if (!doc) {
-      return next(new AppError("No document found with that ID", 404));
+      return next(new AppError("Không tìm thấy dữ liệu với ID này", 404));
     }
     if (Model == Review) {
       Model.calcAverageRatings(doc.product);
@@ -57,7 +57,7 @@ exports.updateOne = (Model) =>
         runValidators: false,
       });
       if (!doc) {
-        return next(new AppError("No document found with that ID", 404));
+        return next(new AppError("Không tìm thấy dữ liệu với ID này", 404));
       }
 
       res.status(200).json({
@@ -101,7 +101,7 @@ exports.updateOne = (Model) =>
     }
 
     if (!doc) {
-      return next(new AppError("No document found with that ID", 404));
+      return next(new AppError("Không tìm thấy dữ liệu với ID này", 404));
     }
 
     res.status(200).json({
@@ -172,7 +172,7 @@ exports.getOne = (Model, popOptions) =>
     const doc = await query;
 
     if (!doc) {
-      return next(new AppError("No document found with that ID", 404));
+      return next(new AppError("Không tìm thấy dữ liệu với ID này", 404));
     }
 
     res.status(200).json({
@@ -208,7 +208,7 @@ exports.getAll = (Model) =>
         totalPage = Math.ceil(totalFilter / Number(req.query.limit));
       }
       if (req.query.page > totalPage)
-        return next(new AppError("This page does not exist", 404));
+        return next(new AppError("Trang này không tồn tại", 404));
       return res.status(200).json({
         status: "success",
         data: {
@@ -231,7 +231,7 @@ exports.getAll = (Model) =>
 
       totalPage = Math.ceil(filterData.length / Number(req.query.limit));
       if (req.query.page > totalPage)
-        return next(new AppError("This page does not exist", 404));
+        return next(new AppError("Trang này không tồn tại", 404));
     }
     // SEND RESPONSE
     res.status(200).json({
@@ -285,7 +285,7 @@ exports.checkPermission = (Model) =>
     // 2) if user is owner, allow to update or delete data
     if (req.user.id != doc.user._id && req.user.role == "user") {
       return next(
-        new AppError("You do not have permission to perform this action", 403)
+        new AppError("Bạn không có quyền để thực hiện", 403)
       );
     }
     if (Model == Order) {

@@ -5,19 +5,19 @@ const orderSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.ObjectId,
       ref: "User",
-      required: [true, "Order must belong to a user"],
+      required: [true, "Hóa đơn phải có người mua"],
     },
     address: {
       type: String,
-      required: [true, "Order must have address to delivery"],
+      required: [true, "Hóa đơn mua hàng phải có địa chỉ vận chuyển"],
     },
     receiver: {
       type: String,
-      required: [true, "Order must have receiver to contact"],
+      required: [true, "Hóa đơn mua hàng phải có thông tin người nhận"],
     },
     phone: {
       type: String,
-      required: [true, "Order must have phone to contact"],
+      required: [true, "Hóa đơn mua hàng phải có số điện thoại người nhận"],
     },
     cart: [
       {
@@ -32,7 +32,7 @@ const orderSchema = new mongoose.Schema(
     totalPrice: Number,
     payments: {
       type: String,
-      required: [true, "An order must have a payment"],
+      required: [true, "Phải có phương thức thanh toán"],
       enum: {
         values: ["tiền mặt", "paypal"],
         message: "Phương thức thanh toán là tiền mặt hoặc ngân hàng",

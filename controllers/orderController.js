@@ -10,11 +10,11 @@ exports.checkStatusOrder = catchAsync(async (req, res, next) => {
       req.body.status != "Cancelled")
   ) {
     return next(
-      new AppError("You do not have permission to perform this action", 403)
+      new AppError("Bạn không có quyền thực hiện.", 403)
     );
   }
   if (req.order.status == "Cancelled" || req.order.status == "Success") {
-    return next(new AppError(`This Order has been ${req.order.status}`, 403));
+    return next(new AppError(`Đơn hàng nãy đã ${req.order.status}`, 403));
   }
   next();
 });
