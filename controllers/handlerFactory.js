@@ -7,7 +7,7 @@ const Order = require("./../models/orderModel");
 const Import = require("./../models/importModel");
 const User = require("./../models/userModel");
 
-function handleQuery(req,value) {
+function handleQuery(req, value) {
   const obj = {};
   if (req.query[value + "_lt"] != undefined) obj.lt = req.query[value + "_lt"];
   if (req.query[value + "_lte"] != undefined)
@@ -185,8 +185,8 @@ exports.getOne = (Model, popOptions) =>
 
 exports.getAll = (Model) =>
   catchAsync(async (req, res, next) => {
-    handleQuery(req,"price");
-    handleQuery(req,"promotion");
+    handleQuery(req, "price");
+    handleQuery(req, "promotion");
     // To allow for nested GET reviews on tour (hack)
     let filter = {};
     if (req.params.productId) filter = { product: req.params.productId };
@@ -260,8 +260,12 @@ exports.getTable = (Model) =>
         const recordsFiltered = c;
         Model.find(
           filter,
-          "",
-          { skip: Number(req.query.start), limit: Number(req.query.length) },
+          {},
+          {
+            sort: {_id: -1},
+            skip: Number(req.query.start),
+            limit: Number(req.query.length),
+          },
           function (err, results) {
             if (err) {
               return;
@@ -284,9 +288,7 @@ exports.checkPermission = (Model) =>
     const doc = await Model.findById(req.params.id);
     // 2) if user is owner, allow to update or delete data
     if (req.user.id != doc.user._id && req.user.role == "user") {
-      return next(
-        new AppError("Bạn không có quyền để thực hiện", 403)
-      );
+      return next(new AppError("Bạn không có quyền để thực hiện", 403));
     }
     if (Model == Order) {
       req.order = doc;

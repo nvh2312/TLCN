@@ -9,11 +9,14 @@ const Import = require("../models/importModel");
 
 const router = express.Router();
 router.use(authController.isLoggedIn);
+
 router.get("/login", viewController.alreadyLoggedIn, (req, res, next) => {
   res.status(200).render("login");
 });
 router.use(viewController.errorPage);
-
+router.get("/", (req, res, next) => {
+  res.status(200).render("dashboard");
+});
 router.get("/users", (req, res, next) => {
   res.status(200).render("user");
 });

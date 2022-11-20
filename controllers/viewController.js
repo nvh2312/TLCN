@@ -14,6 +14,6 @@ exports.errorPage = (req, res, next) => {
 };
 exports.alreadyLoggedIn = (req, res, next) => {
   if (res.locals.user != undefined && res.locals.user.role == "admin")
-    return res.redirect("/products");
+    return res.redirect("/");
   next();
 };

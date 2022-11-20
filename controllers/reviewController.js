@@ -5,7 +5,6 @@ const AppError = require("./../utils/appError");
 const catchAsync = require("./../utils/catchAsync");
 
 exports.setProductUserIds = catchAsync(async (req, res, next) => {
-  console.log("ok");
   // Allow nested routes
   if (!req.body.product) req.body.product = req.params.productId;
   if (!req.body.user) req.body.user = req.user.id;

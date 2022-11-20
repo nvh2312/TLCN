@@ -123,7 +123,6 @@ $("#sample_form").on("submit", async (e) => {
     dt.items.add(file);
   });
   const newFileList = dt.files;
-  console.log(newFileList);
   $("input:file")[0].files = newFileList;
   tinyMCE.triggerSave();
   let form_data = new FormData($("form")[0]);

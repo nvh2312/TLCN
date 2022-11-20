@@ -13,7 +13,7 @@ $("#login").click(async function (e) {
         if (data.data.user.role == "admin") {
           showAlert("success", "Login successfully!");
           window.setTimeout(() => {
-            location.assign("/products");
+            location.assign("/");
           }, 1500);
         } else {
           showAlert("error", "Tài khoản của bạn không có quyền truy cập!");

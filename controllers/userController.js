@@ -19,12 +19,7 @@ exports.getMe = (req, res, next) => {
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) Create error if user POSTs password data
   if (req.body.password || req.body.passwordConfirm) {
-    return next(
-      new AppError(
-        "Trang này không dùng để thay đổi mật khẩu",
-        400
-      )
-    );
+    return next(new AppError("Trang này không dùng để thay đổi mật khẩu", 400));
   }
 
   // 2) Filtered out unwanted fields names that are not allowed to be updated,this is all field can update:
@@ -144,11 +139,9 @@ exports.setDefaultAddress = catchAsync(async (req, res) => {
   const address = user.address;
   const index = req.body.id;
   if (address.length > index) {
-    console.log(index);
     const current = await address.findIndex(
       (value) => value.setDefault == true
     );
-    console.log(current);
     address[index].setDefault = true;
     address[current].setDefault = false;
     user.address = address;

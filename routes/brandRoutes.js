@@ -4,14 +4,13 @@ const authController = require("./../controllers/authController");
 
 const router = express.Router();
 
-router.use(authController.protect);
-router.route("/getTableBrand").get(authController.restrictTo("admin"),brandController.getTableBrand);
+router.route("/getTableBrand").get(authController.protect,authController.restrictTo("admin"),brandController.getTableBrand);
 
 router
   .route("/")
   .get(brandController.getAllBrands)
   .post(
-    authController.restrictTo("employee", "admin"),
+    authController.protect,authController.restrictTo("employee", "admin"),
     brandController.createBrand
   );
 
@@ -19,11 +18,11 @@ router
   .route("/:id")
   .get(brandController.getBrand)
   .patch(
-    authController.restrictTo("employee", "admin"),
+    authController.protect,authController.restrictTo("employee", "admin"),
     brandController.updateBrand
   )
   .delete(
-    authController.restrictTo("employee", "admin"),
+    authController.protect,authController.restrictTo("employee", "admin"),
     brandController.deleteBrand
   );
 

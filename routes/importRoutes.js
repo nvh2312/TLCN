@@ -11,11 +11,12 @@ router.route("/getTableImport").get(importController.getTableImport);
 router
   .route("/")
   .get(importController.getAllImports)
-  .post( importController.setImporter,importController.createImport);
+  .post(importController.setImporter, importController.createImport);
+router.route("/sum").get(importController.sumImport);
 router
   .route("/:id")
   .get(importController.getImport)
-  .patch( importController.setImporter,importController.updateImport)
+  .patch(importController.setImporter, importController.updateImport)
   .delete(importController.deleteImport);
 
 module.exports = router;

@@ -57,6 +57,12 @@ const loadData = async () => {
           },
         },
         {
+          data: "inventory",
+          render: function (data) {
+            return '<div class= "my-3">' + data + "</div>";
+          },
+        },
+        {
           data: null,
           render: function (row) {
             let btnEdit =
@@ -124,6 +130,10 @@ $("#add_data").click(function () {
   files = [];
   $("#dynamic_modal_title").text("Add Product");
   $("#sample_form")[0].reset();
+  $("#category").val(null).trigger("change");
+  $("#brand").val(null).trigger("change");
+  $("#demand").val(null).trigger("change");
+  $("#color").val(null).trigger("change");
   $("#action").val("Add");
   $("#id").val("");
 

@@ -10,14 +10,8 @@ const productSchema = new mongoose.Schema(
       required: [true, "Sản phẩm phải có tên phân biệt"],
       unique: true,
       trim: true,
-      maxlength: [
-        200,
-        "Tên sản phẩm tối đa 200 kí tự",
-      ],
-      minlength: [
-        10,
-        "Tên sản phẩm tối thiểu 10 kí tự",
-      ],
+      maxlength: [200, "Tên sản phẩm tối đa 200 kí tự"],
+      minlength: [10, "Tên sản phẩm tối thiểu 10 kí tự"],
       // validate: [validator.isAlpha, 'product name must only contain characters']
     },
     price: {
@@ -29,7 +23,7 @@ const productSchema = new mongoose.Schema(
       validate: {
         validator: function (val) {
           // this only points to current doc on NEW document creation
-          return val < this.price;
+          return val <= this.price;
         },
         message: "Giá giảm: ({VALUE}) phải nhỏ hơn giá gốc",
       },
