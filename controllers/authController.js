@@ -71,6 +71,7 @@ const createSendToken = (user, statusCode, res) => {
     },
   });
 };
+
 const sendVerifyToken = catchAsync(async (user, statusCode, res) => {
   // 1) create token to verify
   const verifyToken = user.createVerifyToken();
@@ -205,18 +206,16 @@ exports.protect = catchAsync(async (req, res, next) => {
   const currentUser = await User.findById(decoded.id);
 
   if (!currentUser) {
-    return next(
-      new AppError(
-        "Token người dùng không còn tồn tại.",
-        401
-      )
-    );
+    return next(new AppError("Token người dùng không còn tồn tại.", 401));
   }
 
   // 4) Check if user changed password after the token was issued
   if (currentUser.changedPasswordAfter(decoded.iat)) {
     return next(
-      new AppError("Tài khoản gần đây đã thay đổi mật khẩu! Xin vui lòng đăng nhập lại.", 401)
+      new AppError(
+        "Tài khoản gần đây đã thay đổi mật khẩu! Xin vui lòng đăng nhập lại.",
+        401
+      )
     );
   }
 
@@ -252,9 +251,7 @@ exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     // roles ['admin', 'employee',[user]]. role='user'
     if (req.user == undefined || !roles.includes(req.user.role)) {
-      return next(
-        new AppError("Bạn không có quyền thực hiện", 403)
-      );
+      return next(new AppError("Bạn không có quyền thực hiện", 403));
     }
     next();
   };
@@ -264,7 +261,12 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
-    return next(new AppError("Tài khoản này không tồn tại. Vui lòng đăng ký để sử dụng", 404));
+    return next(
+      new AppError(
+        "Tài khoản này không tồn tại. Vui lòng đăng ký để sử dụng",
+        404
+      )
+    );
   }
 
   // 2) Generate the random reset token
@@ -296,7 +298,9 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     return next(
-      new AppError("Đã có lỗi xảy ra trong quá trình gửi mail. Vui lòng thực hiện lại sau!"),
+      new AppError(
+        "Đã có lỗi xảy ra trong quá trình gửi mail. Vui lòng thực hiện lại sau!"
+      ),
       500
     );
   }

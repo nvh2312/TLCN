@@ -4,7 +4,7 @@
 <%- include('./partials/head.ejs') %>
 
 
-    <body class="bg-gradient-primary">
+    <body class="bg-gradient-primary" data-alert=`${alert ? alert : '' }`>
 
         <div class="container mt-5">
 
@@ -27,9 +27,8 @@
                                         </div>
                                         <form class="user">
                                             <div class="form-group">
-                                                <input type="email" class="form-control form-control-user"
-                                                    id="email" aria-describedby="emailHelp"
-                                                    placeholder="Enter Email Address...">
+                                                <input type="email" class="form-control form-control-user" id="email"
+                                                    aria-describedby="emailHelp" placeholder="Enter Email Address...">
                                             </div>
                                             <div class="form-group">
                                                 <input type="password" class="form-control form-control-user"
@@ -47,7 +46,7 @@
                                                 Login
                                             </button>
                                             <hr>
-                                            <a href="" class="btn btn-google btn-user btn-block">
+                                            <a href="/google" class="btn btn-google btn-user btn-block">
                                                 <i class="fab fa-google fa-fw"></i> Login with Google
                                             </a>
                                         </form>

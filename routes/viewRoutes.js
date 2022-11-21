@@ -6,6 +6,7 @@ const authController = require("../controllers/authController");
 const viewController = require("../controllers/viewController");
 const Order = require("../models/orderModel");
 const Import = require("../models/importModel");
+const passport = require("../utils/passport");
 
 const router = express.Router();
 router.use(authController.isLoggedIn);
@@ -13,6 +14,24 @@ router.use(authController.isLoggedIn);
 router.get("/login", viewController.alreadyLoggedIn, (req, res, next) => {
   res.status(200).render("login");
 });
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    session: false,
+    scope: ["email", "profile"],
+  })
+);
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "/login",
+  }),
+  viewController.googleLogin
+);
+// router.get("/google/callback", passport.authenticate("google"), (req, res) => {
+//   res.redirect("/");
+// });
 router.use(viewController.errorPage);
 router.get("/", (req, res, next) => {
   res.status(200).render("dashboard");

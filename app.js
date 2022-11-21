@@ -26,16 +26,20 @@ app.engine("ejs", engine);
 app.set("view engine", "ejs");
 // Add headers before the routes are defined
 app.use(
-  cors({
-    origin: "http://127.0.0.1:5173",
-    methods: ["POST", "GET", "PUT", "PATCH", "DELETE"],
-    credentials: true,
-  })
+  cors()
+  //   {
+  //   origin: "http://127.0.0.1:5173",
+  //   methods: ["POST", "GET", "PUT", "PATCH", "DELETE"],
+  //   credentials: true,
+  // }
 );
 // Serving static files
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/bootstrap', express.static(__dirname + '/node_modules/bootstrap/dist/'));
-app.use('/text', express.static(__dirname + '/node_modules/tinymce/'));
+// app.use(express.static(path.join(__dirname, "public")));
+app.use(
+  "/bootstrap",
+  express.static(__dirname + "/node_modules/bootstrap/dist/")
+);
+app.use("/text", express.static(__dirname + "/node_modules/tinymce/"));
 // 1) GLOBAL MIDDLEWARE
 // Set security HTTP headers
 // app.use(helmet());
