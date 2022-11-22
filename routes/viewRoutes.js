@@ -19,6 +19,8 @@ router.get(
   passport.authenticate("google", {
     session: false,
     scope: ["email", "profile"],
+    accessType: "offline",
+    approvalPrompt: "force"
   })
 );
 router.get(
