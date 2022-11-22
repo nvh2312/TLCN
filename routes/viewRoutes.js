@@ -15,7 +15,7 @@ router.get("/login", viewController.alreadyLoggedIn, (req, res, next) => {
   res.status(200).render("login");
 });
 router.get(
-  "/google-callback",
+  "/google",
   passport.authenticate("google", {
     session: false,
     scope: ["email", "profile"],
@@ -24,7 +24,7 @@ router.get(
   })
 );
 router.get(
-  "/google/google-callback",
+  "/google/callback",
   passport.authenticate("google", {
     session: false,
     failureRedirect: "/login",
