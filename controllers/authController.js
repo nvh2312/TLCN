@@ -372,3 +372,17 @@ exports.logout = (req, res) => {
   });
   res.status(200).json({ status: "success" });
 };
+
+exports.googleLogin = catchAsync(async (req, res) => {
+  const email = req.body.email;
+  // 1) Check if user exists
+  const data = await User.findOne({email});
+  // 2) Check if user exist
+  if (data.role == "admin") {
+    createSendToken(data, 200, res);
+  }
+  // 3) If user does not exist, create one
+  else {
+    res.status(400).json({message: "Tài khoản này không được phép truy cập"})
+  }
+});

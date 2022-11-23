@@ -29,6 +29,7 @@
                                             <div class="form-group">
                                                 <input type="email" class="form-control form-control-user" id="email"
                                                     aria-describedby="emailHelp" placeholder="Enter Email Address...">
+                                                <input type="hidden" id="checkLogin">
                                             </div>
                                             <div class="form-group">
                                                 <input type="password" class="form-control form-control-user"
@@ -46,9 +47,19 @@
                                                 Login
                                             </button>
                                             <hr>
-                                            <a href="/google" class="btn btn-google btn-user btn-block">
+                                            <!-- <a href="/google" class="btn btn-google btn-user btn-block">
                                                 <i class="fab fa-google fa-fw"></i> Login with Google
-                                            </a>
+                                            </a> -->
+                                            <div class="form-group text-center">
+                                                <button class="btn btn-block btn-social btn-google" id="btnGoogle"
+                                                    type="button"> <span class="fa fa-google"></span>Login with
+                                                    Google</button>
+                                            </div>
+                                            <div class="form-group text-center">
+                                                <button class="btn btn-block btn-social btn-facebook" id="btnFacebook"
+                                                    type="button"> <span class="fa fa-facebook"></span>Login with
+                                                    Facebook</button>
+                                            </div>
                                         </form>
                                         <hr>
                                         <div class="text-center">
@@ -66,8 +77,47 @@
 
         </div>
 
-        <script src="/js/login.js"></script>
         <script src="/js/alerts.js"></script>
+        <script type="module">
+            // Import the functions you need from the SDKs you need
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics.js";
+            import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js";
+            // TODO: Add SDKs for Firebase products that you want to use
+            // https://firebase.google.com/docs/web/setup#available-libraries
+
+            // Your web app's Firebase configuration
+            // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+            const firebaseConfig = {
+                apiKey: "AIzaSyAb86cfstfZo11kk5EwkI3KPfPcXTV3DdI",
+                authDomain: "hc-tech.firebaseapp.com",
+                projectId: "hc-tech",
+                storageBucket: "hc-tech.appspot.com",
+                messagingSenderId: "707901541960",
+                appId: "1:707901541960:web:23da34b0b69a7af384927d",
+                measurementId: "G-74XYX837EE"
+            };
+            // Initialize Firebase
+            const status = false;
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const provider = new GoogleAuthProvider(app);
+            const btnGoogle = document.getElementById('btnGoogle');
+            const btnFaceBook = document.getElementById('btnFacebook');
+            btnGoogle.addEventListener('click', async e => {
+                try {
+                    const result = await signInWithPopup(auth, provider)
+                    const user = result.user;
+                    $("#checkLogin").val(user.email)
+                } catch (error) {
+                    showAlert("error", error.message);
+                }
+                $("#checkLogin").change()
+            })
+
+
+        </script>
+        <script src="/js/login.js"></script>
     </body>
 
 </html>

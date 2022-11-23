@@ -24,4 +24,17 @@ $("#login").click(async function (e) {
     showAlert("error", error.responseJSON.message);
   }
 });
-
+$("#checkLogin").on("change", async function () {
+  try {
+    await $.ajax({
+      url: "api/v1/users/googleLogin",
+      method: "POST",
+      data: { email: this.value },
+      success: (data) => {
+        location.assign("/");
+      },
+    });
+  } catch (error) {
+    showAlert("error", error.responseJSON.message);
+  }
+});
