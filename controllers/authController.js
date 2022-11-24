@@ -186,8 +186,7 @@ exports.protect = catchAsync(async (req, res, next) => {
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
     ) {
-      token = req.headers.authorization.split(" ")[1];
-      // console.log(req.headers.authorization);
+    token = req.headers.authorization.split(" ")[1];
     } else if (req.cookies.jwt) {
       token = req.cookies.jwt;
     }
@@ -199,6 +198,7 @@ exports.protect = catchAsync(async (req, res, next) => {
       )
     );
   }
+  // console.log(req.cookies.jwt);
   // 2) Verification token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
@@ -376,13 +376,31 @@ exports.logout = (req, res) => {
 exports.googleLogin = catchAsync(async (req, res) => {
   const email = req.body.email;
   // 1) Check if user exists
-  const data = await User.findOne({email});
+  const data = await User.findOne({ email });
   // 2) Check if user exist
   if (data.role == "admin") {
     createSendToken(data, 200, res);
   }
   // 3) If user does not exist, create one
   else {
-    res.status(400).json({message: "Tài khoản này không được phép truy cập"})
+    res.status(400).json({ message: "Tài khoản này không được phép truy cập" });
+  }
+});
+exports.userLoginWith = catchAsync(async (req, res) => {
+  const {email,displayName,emailVerified} = req.body.user;
+  // 1) Check if user exists
+  const data = await User.findOne({ email });
+  // 2) Check if user does not exist, create one and send token
+  if (!data) {
+    const password = email + process.env.JWT_SECRET;
+    const inform = {
+      email,password,name:displayName
+    }
+    const newUser= await User.create(inform);
+    createSendToken(newUser, 200, res);
+  }
+  // 3) If user exist
+  else {
+    createSendToken(data, 200, res);
   }
 });
