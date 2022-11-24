@@ -57,7 +57,10 @@ const createSendToken = (user, statusCode, res) => {
   };
   if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
 
-  res.cookie("jwt", token, cookieOptions);
+  res.cookie("jwt", token, {
+    domain: "onrender.com"||"vercel.app",
+    secure: true,
+  });
   res.locals.user = user;
 
   // Remove password from output
@@ -180,7 +183,6 @@ exports.login = catchAsync(async (req, res, next) => {
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
-  // console.log(req.headers.authorization);
   try {
     if (
       req.headers.authorization &&

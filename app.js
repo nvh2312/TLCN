@@ -28,7 +28,7 @@ app.set("view engine", "ejs");
 app.use(
   cors({
     origin: "https://tech-nu.vercel.app",
-    methods: ["POST", "GET", "PUT", "PATCH", "DELETE"],
+    methods: ["POST", "GET", "PUT", "DELETE"],
     credentials: true,
   })
 );
