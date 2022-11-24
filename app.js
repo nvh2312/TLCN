@@ -27,7 +27,7 @@ app.set("view engine", "ejs");
 // Add headers before the routes are defined
 app.use(
   cors({
-    origin: "http://127.0.0.1:5173",
+    origin: "https://tech-nu.vercel.app",
     methods: ["POST", "GET", "PUT", "PATCH", "DELETE"],
     credentials: true,
   })
@@ -51,7 +51,7 @@ if (process.env.NODE_ENV === "development") {
 
 // Limit requests from same API
 const limiter = rateLimit({
-  max: 100,
+  max: 1000,
   windowMs: 60 * 60 * 1000,
   message: "Too many requests from this IP, please try again in an hour!",
 });

@@ -186,7 +186,7 @@ exports.protect = catchAsync(async (req, res, next) => {
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
     ) {
-    token = req.headers.authorization.split(" ")[1];
+      token = req.headers.authorization.split(" ")[1];
     } else if (req.cookies.jwt) {
       token = req.cookies.jwt;
     }
@@ -387,16 +387,20 @@ exports.googleLogin = catchAsync(async (req, res) => {
   }
 });
 exports.userLoginWith = catchAsync(async (req, res) => {
-  const {email,displayName,emailVerified} = req.body.user;
+  const { email, displayName, emailVerified } = req.body.user;
   // 1) Check if user exists
   const data = await User.findOne({ email });
   // 2) Check if user does not exist, create one and send token
   if (!data) {
     const password = email + process.env.JWT_SECRET;
     const inform = {
-      email,password,name:displayName
-    }
-    const newUser= await User.create(inform);
+      email,
+      password,
+      passwordConfirm: password,
+      name: displayName,
+      active: "active",
+    };
+    const newUser = await User.create(inform);
     createSendToken(newUser, 200, res);
   }
   // 3) If user exist
