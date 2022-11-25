@@ -27,7 +27,7 @@ app.set("view engine", "ejs");
 // Add headers before the routes are defined
 app.use(
   cors({
-    origin: "https://tech-nu.vercel.app",
+    origin: "https://hclaptop.onrender.com",
     methods: ["POST", "GET", "PUT", "DELETE"],
     credentials: true,
   })

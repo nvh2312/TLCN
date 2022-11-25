@@ -57,10 +57,7 @@ const createSendToken = (user, statusCode, res) => {
   };
   if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
 
-  res.cookie("jwt", token, {
-    domain: "onrender.com"||"vercel.app",
-    secure: true,
-  });
+  res.cookie("jwt", token, cookieOptions);
   res.locals.user = user;
 
   // Remove password from output
