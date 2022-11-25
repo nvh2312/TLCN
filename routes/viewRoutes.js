@@ -38,6 +38,9 @@ router.use(viewController.errorPage);
 router.get("/", (req, res, next) => {
   res.status(200).render("dashboard",{title:"Dashboard"});
 });
+router.get("/analytics", (req, res, next) => {
+  res.status(200).render("analytic",{title:"Analytics"});
+});
 router.get("/users", (req, res, next) => {
   res.status(200).render("user",{title:"Manage User"});
 });

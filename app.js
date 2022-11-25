@@ -27,7 +27,7 @@ app.set("view engine", "ejs");
 // Add headers before the routes are defined
 app.use(
   cors({
-    origin: "https://hclaptop.onrender.com",
+    origin: "http://127.0.0.1:5173",
     methods: ["POST", "GET", "PUT", "DELETE"],
     credentials: true,
   })
