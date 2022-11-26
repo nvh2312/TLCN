@@ -18,7 +18,10 @@ router
     orderController.createOrder
   );
 router.route("/count").get(orderController.countStatus);
+router.route("/countOption").post(orderController.countStatusOption);
 router.route("/sum").get(orderController.sumRevenue);
+router.route("/sumOption").post(orderController.sumRevenueOption);
+router.route("/topProduct").post(orderController.topProduct);
 router
   .route("/:id")
   .get(orderController.isOwner, orderController.getOrder)

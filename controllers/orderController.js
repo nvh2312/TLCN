@@ -33,6 +33,49 @@ exports.countStatus = catchAsync(async (req, res, next) => {
   ]);
   res.status(200).json(data);
 });
+
+exports.countStatusOption = catchAsync(async (req, res, next) => {
+  const option = {
+    status: "$status",
+  };
+  if (req.body.year) option.year = { $year: "$createdAt" };
+  if (req.body.month) option.month = { $month: "$createdAt" };
+  if (req.body.week) option.week = { $week: "$createdAt" };
+  if (req.body.date) option.date = { $dayOfWeek: "$createdAt" };
+  const data = await Order.aggregate([
+    {
+      $group: {
+        _id: option,
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+  res.status(200).json(data);
+});
+exports.sumRevenueOption = catchAsync(async (req, res, next) => {
+  const option = {};
+  if (req.body.year) option.year = { $year: "$createdAt" };
+  if (req.body.month) option.month = { $month: "$createdAt" };
+  if (req.body.week) option.week = { $week: "$createdAt" };
+  if (req.body.date) option.date = { $dayOfWeek: "$createdAt" };
+  const data = await Order.aggregate([
+    {
+      $match: { status: "Success" },
+    },
+    {
+      $group: {
+        _id: option,
+        total_revenue: { $sum: "$totalPrice" },
+        // bookings_month: {
+        //   $push: {
+        //     each_order: "$totalPrice",
+        //   },
+        // },
+      },
+    },
+  ]);
+  res.status(200).json(data);
+});
 exports.sumRevenue = catchAsync(async (req, res, next) => {
   const data = await Order.aggregate([
     {
@@ -52,6 +95,35 @@ exports.sumRevenue = catchAsync(async (req, res, next) => {
         // },
       },
     },
+  ]);
+  res.status(200).json(data);
+});
+exports.topProduct = catchAsync(async (req, res, next) => {
+  const option = {
+    product: "$cart.product.id",
+  };
+  if (req.body.year) option.year = { $year: "$createdAt" };
+  if (req.body.month) option.month = { $month: "$createdAt" };
+  if (req.body.week) option.week = { $week: "$createdAt" };
+  if (req.body.date) option.date = { $dayOfWeek: "$createdAt" };
+
+  const data = await Order.aggregate([
+    {
+      $unwind: "$cart",
+    },
+    {
+      $match: { status: "Success" },
+    },
+    {
+      $group: {
+        _id: option,
+        quantity: { $sum: "$cart.quantity" },
+        title: { $first: "$cart.product.title" },
+        image: { $first: "$cart.product.images" },
+      },
+    },
+    { $sort: { quantity: -1 } },
+    { $limit: 5 },
   ]);
   res.status(200).json(data);
 });

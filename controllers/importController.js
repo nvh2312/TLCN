@@ -3,11 +3,7 @@ const factory = require("./handlerFactory");
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("./../utils/appError");
 exports.setImporter = (req, res, next) => {
-  if (!req.user)
-    return next(
-      new AppError("Bạn không có quyền thực hiện"),
-      403
-    );
+  if (!req.user) return next(new AppError("Bạn không có quyền thực hiện"), 403);
   req.body.invoice = JSON.parse(req.body.invoice);
   req.body.user = req.user;
   next();
@@ -33,6 +29,23 @@ exports.sumImport = catchAsync(async (req, res, next) => {
         //     each_order: "$totalPrice",
         //   },
         // },
+      },
+    },
+  ]);
+  res.status(200).json(data);
+});
+exports.sumOption = catchAsync(async (req, res, next) => {
+  const option = {};
+  if (req.body.year) option.year = { $year: "$createdAt" };
+  if (req.body.month) option.month = { $month: "$createdAt" };
+  if (req.body.week) option.week = { $week: "$createdAt" };
+  if (req.body.date) option.date = { $dayOfWeek: "$createdAt" };
+
+  const data = await Import.aggregate([
+    {
+      $group: {
+        _id: option,
+        total: { $sum: "$totalPrice" },
       },
     },
   ]);
