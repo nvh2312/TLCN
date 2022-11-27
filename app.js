@@ -11,7 +11,7 @@ const cookieParser = require("cookie-parser");
 const engine = require("ejs-mate");
 
 const AppError = require("./utils/appError");
-const globalErrorHandler = require("./controllers/errorController");
+// const globalErrorHandler = require("./controllers/errorController");
 const productRouter = require("./routes/productRoutes");
 const userRouter = require("./routes/userRoutes");
 const categoryRouter = require("./routes/categoryRoutes");
@@ -100,6 +100,17 @@ app.all("*", (req, res, next) => {
   res.status(200).render("404");
 });
 
-app.use(globalErrorHandler);
+app.use((err, req, res, next) => {
+  // console.log(err.stack);
+
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || "error";
+  res.status(err.statusCode).json({
+    status: err.status,
+    error: err,
+    message: err.message,
+    stack: err.stack,
+  });
+});
 
 module.exports = app;
