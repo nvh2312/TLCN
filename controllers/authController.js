@@ -1,12 +1,17 @@
 const crypto = require("crypto");
 const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
+const { connect } = require('getstream');
 const User = require("./../models/userModel");
 const Review = require("./../models/reviewModel");
 const Order = require("./../models/orderModel");
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("./../utils/appError");
 const sendEmail = require("./../utils/email");
+
+const api_key = process.env.STREAM_API_KEY;
+const api_secret = process.env.STREAM_API_SECRET;
+const app_id = process.env.STREAM_APP_ID;
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -47,7 +52,7 @@ exports.changeStateUser = catchAsync(async (req, res, next) => {
   }
   changeState(currentUser, state, 200, res);
 });
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = async (user, statusCode, res) => {
   const token = signToken(user._id);
   const cookieOptions = {
     expires: new Date(
@@ -63,12 +68,16 @@ const createSendToken = (user, statusCode, res) => {
   // Remove password from output
   user.password = undefined;
 
+  const serverClient = connect(api_key, api_secret, app_id);
+  const tokenStream = serverClient.createUserToken(user.id);
+
   res.status(statusCode).json({
     status: "success",
     token,
     data: {
       user,
     },
+    tokenStream,
   });
 };
 
@@ -404,6 +413,12 @@ exports.userLoginWith = catchAsync(async (req, res) => {
   }
   // 3) If user exist
   else {
+    if (data.active == "ban")
+      return next(new AppError("Tài khoản của bạn đã bị ban.", 401));
+    if (data.active == "verify") {
+      data.active = "active";
+      await data.save({ validateBeforeSave: false });
+    }
     createSendToken(data, 200, res);
   }
 });
