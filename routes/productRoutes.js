@@ -2,10 +2,12 @@ const express = require("express");
 const productController = require("./../controllers/productController");
 const authController = require("./../controllers/authController");
 const reviewRouter = require("./../routes/reviewRoutes");
+const commentRouter = require("./../routes/commentRoutes");
 
 const router = express.Router();
 
 router.use("/:productId/reviews", reviewRouter);
+router.use("/:productId/comments", commentRouter);
 router
   .route("/top-5-cheap")
   .get(productController.aliasTopProducts, productController.getAllProducts);
