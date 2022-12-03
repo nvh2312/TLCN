@@ -51,3 +51,29 @@ exports.sumOption = catchAsync(async (req, res, next) => {
   ]);
   res.status(200).json(data);
 });
+exports.sumInRange = catchAsync(async (req, res, next) => {
+  const option = {};
+  const dateFrom = req.body.dateFrom;
+  const dateTo = req.body.dateTo;
+  let dateStart = new Date(dateFrom);
+  dateStart;
+  let dateEnd = new Date(dateTo);
+  dateStart.setUTCHours(0, 0, 0, 0);
+  dateEnd.setUTCHours(23, 59, 59, 999);
+  dateStart.setTime(dateStart.getTime() + 14 * 60 * 60 * 1000);
+  dateEnd.setTime(dateEnd.getTime() + 14 * 60 * 60 * 1000);
+  const data = await Import.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: dateStart, $lt: dateEnd },
+      },
+    },
+    {
+      $group: {
+        _id: option,
+        total: { $sum: "$totalPrice" },
+      },
+    },
+  ]);
+  res.status(200).json(data);
+});

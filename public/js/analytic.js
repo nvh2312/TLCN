@@ -451,8 +451,10 @@ ${value.quantity} sản phẩm
 }
 
 $("#birthday").on("change", function () {
+  console.log(this.value)
   const date = new Date(this.value);
   theDay = date.getDay() == 0 ? 7 : date.getDay();
+  console.log(theDay)
   const oneJ = new Date(date.getFullYear(), 0, 1);
   const numberOfD = Math.floor((date - oneJ) / (24 * 60 * 60 * 1000));
   theWeek = Math.ceil((numberOfD - 1) / 7);

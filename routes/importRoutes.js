@@ -14,6 +14,7 @@ router
   .post(importController.setImporter, importController.createImport);
 router.route("/sum").get(importController.sumImport);
 router.route("/sumOption").post(importController.sumOption);
+router.route("/sumInRange").post(importController.sumInRange);
 router
   .route("/:id")
   .get(importController.getImport)

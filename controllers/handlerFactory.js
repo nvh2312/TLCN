@@ -6,6 +6,7 @@ const Review = require("./../models/reviewModel");
 const Order = require("./../models/orderModel");
 const Import = require("./../models/importModel");
 const User = require("./../models/userModel");
+const Comment = require("./../models/commentModel");
 
 function handleQuery(req, value) {
   const obj = {};
@@ -29,8 +30,23 @@ exports.deleteOne = (Model) =>
       });
     }
     const doc = await Model.findByIdAndDelete(req.params.id);
+
     if (!doc) {
       return next(new AppError("Không tìm thấy dữ liệu với ID này", 404));
+    }
+    if (Model == Comment) {
+      await doc.children.forEach(async (child) => {
+        await Model.findByIdAndDelete(child);
+      });
+      if (doc.parent != null) {
+        const parent = await Model.findById(doc.parent);
+        console.log(doc.parent, parent);
+        const newChildren = await parent.children.filter(
+          (child) => child.id != doc.id
+        );
+        parent.children = newChildren;
+        await parent.save({ validateBeforeSave: false });
+      }
     }
     if (Model == Review) {
       Model.calcAverageRatings(doc.product);
@@ -147,6 +163,7 @@ exports.createOne = (Model) =>
         },
       });
     }
+
     if (Model == Import) {
       const invoice = req.body.invoice;
       for (const value of invoice) {
@@ -157,6 +174,13 @@ exports.createOne = (Model) =>
     }
 
     const doc = await Model.create(req.body);
+    if (Model === Comment) {
+      const data = await Comment.findById(req.body.parent);
+      if (data) {
+        data.children.push(doc.id);
+        await data.save({ validateBeforeSave: false });
+      }
+    }
     res.status(201).json({
       status: "success",
       data: {
@@ -208,7 +232,17 @@ exports.getAll = (Model) =>
         totalPage = Math.ceil(totalFilter / Number(req.query.limit));
       }
       if (req.query.page > totalPage)
-        return next(new AppError("Trang này không tồn tại", 404));
+        return res.status(200).json({
+          status: "success",
+          data: {
+            data: doc,
+            results: doc.length,
+            ratingsQuantity: more.ratingsQuantity,
+            ratingsAverage: more.ratingsAverage,
+            eachRating: more.eachRating,
+            totalPage: 1,
+          },
+        });
       return res.status(200).json({
         status: "success",
         data: {
@@ -262,7 +296,7 @@ exports.getTable = (Model) =>
           filter,
           {},
           {
-            sort: {_id: -1},
+            sort: { _id: -1 },
             skip: Number(req.query.start),
             limit: Number(req.query.length),
           },

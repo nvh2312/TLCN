@@ -127,3 +127,99 @@ exports.topProduct = catchAsync(async (req, res, next) => {
   ]);
   res.status(200).json(data);
 });
+
+exports.countStatusInRange = catchAsync(async (req, res, next) => {
+  const dateFrom = req.body.dateFrom;
+  const dateTo = req.body.dateTo;
+  const option = {
+    status: "$status",
+  };
+  let dateStart = new Date(dateFrom);
+  dateStart;
+  let dateEnd = new Date(dateTo);
+  dateStart.setUTCHours(0, 0, 0, 0);
+  dateEnd.setUTCHours(23, 59, 59, 999);
+  dateStart.setTime(dateStart.getTime() + 14 * 60 * 60 * 1000);
+  dateEnd.setTime(dateEnd.getTime() + 14 * 60 * 60 * 1000);
+  const data = await Order.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: dateStart, $lt: dateEnd },
+      },
+    },
+    {
+      $group: {
+        _id: option,
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+  res.status(200).json(data);
+});
+exports.topProductInRange = catchAsync(async (req, res, next) => {
+  const option = {
+    product: "$cart.product.id",
+  };
+  const dateFrom = req.body.dateFrom;
+  const dateTo = req.body.dateTo;
+  let dateStart = new Date(dateFrom);
+  dateStart;
+  let dateEnd = new Date(dateTo);
+  dateStart.setUTCHours(0, 0, 0, 0);
+  dateEnd.setUTCHours(23, 59, 59, 999);
+  dateStart.setTime(dateStart.getTime() + 14 * 60 * 60 * 1000);
+  dateEnd.setTime(dateEnd.getTime() + 14 * 60 * 60 * 1000);
+  const data = await Order.aggregate([
+    {
+      $unwind: "$cart",
+    },
+    {
+      $match: {
+        status: "Success",
+        createdAt: { $gte: dateStart, $lt: dateEnd },
+      },
+    },
+    {
+      $group: {
+        _id: option,
+        quantity: { $sum: "$cart.quantity" },
+        title: { $first: "$cart.product.title" },
+        image: { $first: "$cart.product.images" },
+      },
+    },
+    { $sort: { quantity: -1 } },
+    { $limit: 5 },
+  ]);
+  res.status(200).json(data);
+});
+exports.sumInRange = catchAsync(async (req, res, next) => {
+  const dateFrom = req.body.dateFrom;
+  const dateTo = req.body.dateTo;
+  let dateStart = new Date(dateFrom);
+  dateStart;
+  let dateEnd = new Date(dateTo);
+  dateStart.setUTCHours(0, 0, 0, 0);
+  dateEnd.setUTCHours(23, 59, 59, 999);
+  dateStart.setTime(dateStart.getTime() + 14 * 60 * 60 * 1000);
+  dateEnd.setTime(dateEnd.getTime() + 14 * 60 * 60 * 1000);
+  const data = await Order.aggregate([
+    {
+      $match: {
+        status: "Success",
+        createdAt: { $gte: dateStart, $lt: dateEnd },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        total_revenue: { $sum: "$totalPrice" },
+        // bookings_month: {
+        //   $push: {
+        //     each_order: "$totalPrice",
+        //   },
+        // },
+      },
+    },
+  ]);
+  res.status(200).json(data);
+});

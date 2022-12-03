@@ -22,6 +22,9 @@ router.route("/countOption").post(orderController.countStatusOption);
 router.route("/sum").get(orderController.sumRevenue);
 router.route("/sumOption").post(orderController.sumRevenueOption);
 router.route("/topProduct").post(orderController.topProduct);
+router.route("/statusInRange").post(orderController.countStatusInRange);
+router.route("/topProductInRange").post(orderController.topProductInRange);
+router.route("/sumInRange").post(orderController.sumInRange);
 router
   .route("/:id")
   .get(orderController.isOwner, orderController.getOrder)

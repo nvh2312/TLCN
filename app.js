@@ -19,6 +19,7 @@ const brandRouter = require("./routes/brandRoutes");
 const reviewRouter = require("./routes/reviewRoutes");
 const orderRouter = require("./routes/orderRoutes");
 const importRouter = require("./routes/importRoutes");
+const commentRouter = require("./routes/commentRoutes");
 const viewRouter = require("./routes/viewRoutes");
 
 const app = express();
@@ -28,7 +29,7 @@ app.set("view engine", "ejs");
 app.use(
   cors({
     origin: "http://127.0.0.1:5173",
-    methods: ["POST", "GET", "PUT", "DELETE"],
+    methods: ["POST", "GET", "PUT","PATCH", "DELETE"],
     credentials: true,
   })
 );
@@ -93,6 +94,7 @@ app.use("/api/v1/brands", brandRouter);
 app.use("/api/v1/reviews", reviewRouter);
 app.use("/api/v1/orders", orderRouter);
 app.use("/api/v1/imports", importRouter);
+app.use("/api/v1/comments", commentRouter);
 app.use("/", viewRouter);
 
 app.all("*", (req, res, next) => {
