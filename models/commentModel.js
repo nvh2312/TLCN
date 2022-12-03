@@ -28,6 +28,7 @@ const CommentSchema = new mongoose.Schema(
       ref: "Comment",
       default: null,
     },
+    like: [],
     children: [
       {
         type: mongoose.Schema.ObjectId,
@@ -50,7 +51,7 @@ CommentSchema.index({ "$**": "text" });
 //   localField: "_id",
 // });
 
-CommentSchema.pre(/^find/, async function (next) {
+CommentSchema.pre(/^find/, function (next) {
   this.populate({
     path: "user",
     select: "name avatar",
@@ -60,6 +61,13 @@ CommentSchema.pre(/^find/, async function (next) {
   });
   next();
 });
+// CommentSchema.pre("findOneAndDelete", async function (next) {
+//   const data = await this.findOne().clone();
+//   await this.remove({
+//     _id: { $in: data.children },
+//   });
+//   next();
+// });
 
 const Comment = mongoose.model("Comment", CommentSchema);
 

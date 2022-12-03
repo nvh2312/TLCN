@@ -16,6 +16,12 @@ router
   );
 router.route("/getTableComment").get(commentController.getTableComment);
 router
+  .route("/setLike/:id")
+  .patch(
+    authController.restrictTo("user", "employee", "admin"),
+    commentController.likeComment
+  );
+router
   .route("/:id")
   .get(commentController.getComment)
   .patch(

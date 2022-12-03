@@ -8,6 +8,20 @@ const Import = require("./../models/importModel");
 const User = require("./../models/userModel");
 const Comment = require("./../models/commentModel");
 
+async function recursiveChildren(obj, arr) {
+  const data = await Comment.findById(obj);
+  for (let i = 0; i < data.children.length; i++) {
+    if (arr.includes(data.children[i])) {
+      data.splice(i, 1);
+      i--;
+    }
+  }
+  if (data.children == null) {
+    arr.push(obj);
+    return;
+  } else recursiveChildren(data.children[0].id, arr);
+}
+
 function handleQuery(req, value) {
   const obj = {};
   if (req.query[value + "_lt"] != undefined) obj.lt = req.query[value + "_lt"];
@@ -35,12 +49,25 @@ exports.deleteOne = (Model) =>
       return next(new AppError("Không tìm thấy dữ liệu với ID này", 404));
     }
     if (Model == Comment) {
-      await doc.children.forEach(async (child) => {
-        await Model.findByIdAndDelete(child);
+      let arr = [];
+      for (const value of doc.children) {
+        await recursiveChildren(value.id, arr);
+      }
+      // await doc.children.forEach(async (value) => {
+      //   await recursiveChildren(value.id, arr);
+      // });
+      console.log(arr);
+      await Model.deleteMany({
+        _id: { $in: arr },
       });
+      // await doc.children.forEach(async (child) => {
+      //   // await Model.findByIdAndDelete(child);
+      //   await Model.remove({
+      //     _id: { $in: child },
+      //   });
+      // });
       if (doc.parent != null) {
         const parent = await Model.findById(doc.parent);
-        console.log(doc.parent, parent);
         const newChildren = await parent.children.filter(
           (child) => child.id != doc.id
         );
@@ -91,7 +118,7 @@ exports.updateOne = (Model) =>
         });
       }
     }
-    if (Model == Review) {
+    if (Model == Review || Model == Comment) {
       req.body.updateAt = Date.now() - 1000;
     }
     if (Model == Import) {
@@ -108,18 +135,18 @@ exports.updateOne = (Model) =>
         });
       }
     }
+
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
-    if (Model == Review) {
-      Model.calcAverageRatings(doc.product);
-    }
 
     if (!doc) {
       return next(new AppError("Không tìm thấy dữ liệu với ID này", 404));
     }
-
+    if (Model == Review) {
+      Model.calcAverageRatings(doc.product);
+    }
     res.status(200).json({
       status: "success",
       data: {
@@ -214,6 +241,7 @@ exports.getAll = (Model) =>
     // To allow for nested GET reviews on tour (hack)
     let filter = {};
     if (req.params.productId) filter = { product: req.params.productId };
+    if (Model == Comment) filter.parent = null;
     const features = new APIFeatures(Model.find(filter), req.query)
       .filter()
       .sort()
@@ -265,7 +293,14 @@ exports.getAll = (Model) =>
 
       totalPage = Math.ceil(filterData.length / Number(req.query.limit));
       if (req.query.page > totalPage)
-        return next(new AppError("Trang này không tồn tại", 404));
+        return res.status(200).json({
+          status: "success",
+          data: {
+            data: doc,
+            results: doc.length,
+            totalPage: 1,
+          },
+        });
     }
     // SEND RESPONSE
     res.status(200).json({
