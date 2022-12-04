@@ -54,7 +54,7 @@ CommentSchema.index({ "$**": "text" });
 CommentSchema.pre(/^find/, function (next) {
   this.populate({
     path: "user",
-    select: "name avatar",
+    select: "name avatar role",
   }).populate({
     path: "children",
     select: "-__v",
