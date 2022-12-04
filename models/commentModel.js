@@ -55,10 +55,15 @@ CommentSchema.pre(/^find/, function (next) {
   this.populate({
     path: "user",
     select: "name avatar role",
-  }).populate({
-    path: "children",
-    select: "-__v",
-  });
+  })
+    .populate({
+      path: "children",
+      select: "-__v",
+    })
+    .populate({
+      path: "parent",
+      select: "-__v",
+    });
   next();
 });
 // CommentSchema.pre("findOneAndDelete", async function (next) {

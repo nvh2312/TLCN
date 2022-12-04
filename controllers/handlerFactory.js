@@ -8,19 +8,19 @@ const Import = require("./../models/importModel");
 const User = require("./../models/userModel");
 const Comment = require("./../models/commentModel");
 
-async function recursiveChildren(obj, arr) {
-  const data = await Comment.findById(obj);
-  for (let i = 0; i < data.children.length; i++) {
-    if (arr.includes(data.children[i])) {
-      data.splice(i, 1);
-      i--;
-    }
-  }
-  if (data.children == null) {
-    arr.push(obj);
-    return;
-  } else recursiveChildren(data.children[0].id, arr);
-}
+// async function recursiveChildren(obj, arr) {
+//   const data = await Comment.findById(obj);
+//   for (let i = 0; i < data.children.length; i++) {
+//     if (arr.includes(data.children[i])) {
+//       data.splice(i, 1);
+//       i--;
+//     }
+//   }
+//   if (data.children == null) {
+//     arr.push(obj);
+//     return;
+//   } else recursiveChildren(data.children[0].id, arr);
+// }
 
 function handleQuery(req, value) {
   const obj = {};
@@ -49,16 +49,15 @@ exports.deleteOne = (Model) =>
       return next(new AppError("Không tìm thấy dữ liệu với ID này", 404));
     }
     if (Model == Comment) {
-      let arr = [];
-      for (const value of doc.children) {
-        await recursiveChildren(value.id, arr);
-      }
+      // let arr = [];
+      // for (const value of doc.children) {
+      //   await recursiveChildren(value.id, arr);
+      // }
       // await doc.children.forEach(async (value) => {
       //   await recursiveChildren(value.id, arr);
       // });
-      console.log(arr);
       await Model.deleteMany({
-        _id: { $in: arr },
+        _id: { $in: doc.children },
       });
       // await doc.children.forEach(async (child) => {
       //   // await Model.findByIdAndDelete(child);

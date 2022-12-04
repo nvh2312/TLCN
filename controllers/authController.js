@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
-const { connect } = require('getstream');
+const { connect } = require("getstream");
 const User = require("./../models/userModel");
 const Review = require("./../models/reviewModel");
 const Order = require("./../models/orderModel");
@@ -394,7 +394,7 @@ exports.googleLogin = catchAsync(async (req, res) => {
     res.status(400).json({ message: "Tài khoản này không được phép truy cập" });
   }
 });
-exports.userLoginWith = catchAsync(async (req, res) => {
+exports.userLoginWith = catchAsync(async (req, res, next) => {
   const { email, displayName, emailVerified } = req.body.user;
   // 1) Check if user exists
   const data = await User.findOne({ email });

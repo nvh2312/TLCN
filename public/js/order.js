@@ -11,7 +11,8 @@ const loadData = async () => {
         {
           data: "user",
           render: function (data) {
-            return '<div class= "my-3">' + data.name + "</div>";
+            const n = data?data.name:null;
+            return '<div class= "my-3">' + n + "</div>";
           },
         },
         {
