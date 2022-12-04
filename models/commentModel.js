@@ -60,10 +60,6 @@ CommentSchema.pre(/^find/, function (next) {
       path: "children",
       select: "-__v",
     })
-    .populate({
-      path: "parent",
-      select: "-__v",
-    });
   next();
 });
 // CommentSchema.pre("findOneAndDelete", async function (next) {

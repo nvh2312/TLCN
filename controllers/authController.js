@@ -97,7 +97,7 @@ const sendVerifyToken = catchAsync(async (user, statusCode, res) => {
 
   res.cookie("jwt", token, cookieOptions);
   // 3) Send it to user's email
-  const verifyURL = `http://localhost:5173/verify`;
+  const verifyURL = `https://hctech.onrender.com/verify`;
   const message = `Bạn là chủ tài khoản? Vui lòng xác nhận tài khoản tại:  ${verifyURL}.\nMã xác nhận: ${verifyToken}\n.Nếu không phải, vui lòng bỏ qua mail này!`;
   user.password = undefined;
   try {
@@ -284,7 +284,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 3) Send it to user's email
   const resetURL = `${req.protocol}://${req.get(
     "host"
-  )}/api/v1/users/resetPassword/${resetToken}`;
+  )}/forgot-password`;
 
   const message = `Bạn quên mật khẩu? Mã xác nhận của bạn: ${resetToken}.\nĐổi mật khẩu mới tại : ${resetURL}.\nNếu không phải bạn, vui lòng bỏ qua email này!`;
 
