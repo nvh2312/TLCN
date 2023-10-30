@@ -92,5 +92,8 @@ router.get("/categories", (req, res, next) => {
 router.get("/reviews", (req, res, next) => {
   res.status(200).render("review",{title:"Manage Review"});
 });
+router.get("/locations", (req, res, next) => {
+  res.status(200).render("location",{title:"Manage Location"});
+});
 
 module.exports = router;

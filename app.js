@@ -21,6 +21,8 @@ const orderRouter = require("./routes/orderRoutes");
 const importRouter = require("./routes/importRoutes");
 const commentRouter = require("./routes/commentRoutes");
 const viewRouter = require("./routes/viewRoutes");
+const transactionRouter = require("./routes/transactionRoutes");
+const locationRouter = require("./routes/locationRoutes");
 
 const app = express();
 app.engine("ejs", engine);
@@ -95,6 +97,8 @@ app.use("/api/v1/reviews", reviewRouter);
 app.use("/api/v1/orders", orderRouter);
 app.use("/api/v1/imports", importRouter);
 app.use("/api/v1/comments", commentRouter);
+app.use("/api/v1/payments", transactionRouter);
+app.use("/api/v1/locations", locationRouter);
 app.use("/", viewRouter);
 
 app.all("*", (req, res, next) => {

@@ -2,6 +2,7 @@ const Import = require("./../models/importModel");
 const factory = require("./handlerFactory");
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("./../utils/appError");
+const moment = require("moment");
 exports.setImporter = (req, res, next) => {
   if (!req.user) return next(new AppError("Bạn không có quyền thực hiện"), 403);
   req.body.invoice = JSON.parse(req.body.invoice);
@@ -56,16 +57,13 @@ exports.sumInRange = catchAsync(async (req, res, next) => {
   const dateFrom = req.body.dateFrom;
   const dateTo = req.body.dateTo;
   let dateStart = new Date(dateFrom);
-  dateStart;
   let dateEnd = new Date(dateTo);
   dateStart.setUTCHours(0, 0, 0, 0);
   dateEnd.setUTCHours(23, 59, 59, 999);
-  dateStart.setTime(dateStart.getTime() + 14 * 60 * 60 * 1000);
-  dateEnd.setTime(dateEnd.getTime() + 14 * 60 * 60 * 1000);
   const data = await Import.aggregate([
     {
       $match: {
-        createdAt: { $gte: dateStart, $lt: dateEnd },
+        createdAt: { $gte: moment.utc(dateStart).toDate(), $lt: moment.utc(dateEnd).toDate() },
       },
     },
     {

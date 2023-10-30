@@ -324,10 +324,11 @@ async function loadAreaChart() {
           month.total = value.total_month;
       });
     });
+
     document.getElementById("totalRevenue").innerHTML =
-      (totalRevenue / 1000000).toFixed() + " Triệu VND";
+      (Number((totalRevenue / 1000000).toFixed())).toLocaleString().replace(/,/g, '.') + " Triệu VND";
     document.getElementById("totalInvoice").innerHTML =
-      (totalInvoice / 1000000).toFixed() + " Triệu VND";
+      (Number((totalInvoice / 1000000).toFixed())).toLocaleString().replace(/,/g, '.')  + " Triệu VND";
     const revenue = await arr_revenue.map((value) => value.total);
     const invoice = await arr_invoice.map((value) => value.total);
     const ctc = document.getElementById("myAreaChart");

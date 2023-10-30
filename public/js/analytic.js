@@ -181,6 +181,7 @@ ${value.title}
 ${value.quantity} sản phẩm
 </div>`);
     });
+    $("#inventory-product").empty();
     topInventory.data.data.forEach((value, index) => {
       $("#inventory-product")
         .append(`<div class="col-md-1 d-flex text-center align-items-center justify-content-center">
@@ -198,6 +199,7 @@ ${value.inventory} sản phẩm
 </div>`);
     });
   }
+  $("#inventory-product").empty();
   topInventory.data.data.forEach((value, index) => {
     $("#inventory-product")
       .append(`<div class="col-md-1 d-flex text-center align-items-center justify-content-center">
@@ -217,13 +219,25 @@ ${value.inventory} sản phẩm
   const a = totalRevenue[0] ? totalRevenue[0].total_revenue : 0;
   const b = totalImport[0] ? totalImport[0].total : 0;
   document.getElementById("totalRevenue").innerHTML =
-    (a / 1000000).toFixed() + " Triệu VND";
+    Number((a / 1000000).toFixed())
+      .toLocaleString()
+      .replace(/,/g, ".") + " Triệu VND";
   document.getElementById("totalInvoice").innerHTML =
-    (b / 1000000).toFixed() + " Triệu VND";
+    Number((b / 1000000).toFixed())
+      .toLocaleString()
+      .replace(/,/g, ".") + " Triệu VND";
   $("#totalUser").html(countUser.results);
   $("#totalOrder").html(arr_status[4].quantity);
 });
 async function changeData(e) {
+  if (e === "inRange") {
+    $("#birthday").val(null);
+  } else {
+    $("#dateRange").val(null);
+    if(e !== "inDay") {
+      $("#birthday").val(null);
+    }
+  }
   let dateFrom;
   let dateTo;
   let data;
@@ -271,6 +285,7 @@ async function changeData(e) {
   ${value.quantity} sản phẩm
   </div>`);
       });
+      $("#inventory-product").empty();
       topInventory.data.data.forEach((value, index) => {
         $("#inventory-product")
           .append(`<div class="col-md-1 d-flex text-center align-items-center justify-content-center">
@@ -291,9 +306,13 @@ async function changeData(e) {
     const a = totalRevenue[0] ? totalRevenue[0].total_revenue : 0;
     const b = totalImport[0] ? totalImport[0].total : 0;
     document.getElementById("totalRevenue").innerHTML =
-      (a / 1000000).toFixed() + " Triệu VND";
+      Number((a / 1000000).toFixed())
+        .toLocaleString()
+        .replace(/,/g, ".") + " Triệu VND";
     document.getElementById("totalInvoice").innerHTML =
-      (b / 1000000).toFixed() + " Triệu VND";
+      Number((b / 1000000).toFixed())
+        .toLocaleString()
+        .replace(/,/g, ".") + " Triệu VND";
     $("#totalUser").html(countUser.results);
     $("#totalOrder").html(arr_status[4].quantity);
   } else {
@@ -344,7 +363,9 @@ async function changeData(e) {
     });
     const revenueValue = totalRevenue[0] ? totalRevenue[0].total_revenue : 0;
     document.getElementById("totalRevenue").innerHTML =
-      (revenueValue / 1000000).toFixed() + " Triệu VND";
+      Number((revenueValue / 1000000).toFixed())
+        .toLocaleString()
+        .replace(/,/g, ".") + " Triệu VND";
 
     const totalImport = await $.ajax({
       url: "api/v1/imports/sumInRange",
@@ -354,7 +375,9 @@ async function changeData(e) {
     let importValue = totalImport[0] ? totalImport[0].total : 0;
 
     document.getElementById("totalInvoice").innerHTML =
-      (importValue / 1000000).toFixed() + " Triệu VND";
+      Number((importValue / 1000000).toFixed())
+        .toLocaleString()
+        .replace(/,/g, ".") + " Triệu VND";
 
     const topProduct = await $.ajax({
       url: "api/v1/orders/topProductInRange",

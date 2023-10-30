@@ -2,6 +2,10 @@ const Order = require("./../models/orderModel");
 const factory = require("./handlerFactory");
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("./../utils/appError");
+const moment = require("moment");
+const mailTemplate = require("./mailTemplate");
+const Product = require("../models/productModel");
+const sendEmail = require("../utils/email");
 
 exports.checkStatusOrder = catchAsync(async (req, res, next) => {
   if (
@@ -20,7 +24,41 @@ exports.getTableOrder = factory.getTable(Order);
 exports.createOrder = factory.createOne(Order);
 exports.getOrder = factory.getOne(Order);
 exports.getAllOrders = factory.getAll(Order);
-exports.updateOrder = factory.updateOne(Order);
+exports.updateOrder = catchAsync(async (req, res, next) => {
+  if (req.body.status == "Cancelled") {
+    const cart = req.order.cart;
+    for (const value of cart) {
+      await Product.findByIdAndUpdate(value.product._id, {
+        $inc: { inventory: value.quantity },
+      });
+    }
+  }
+  const doc = await Order.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  if (!doc) {
+    return next(new AppError("Không tìm thấy dữ liệu với ID này", 404));
+  }
+  try {
+    const domain = `https://hctech.onrender.com`;
+    const message = mailTemplate(doc, domain);
+    await sendEmail({
+      email: doc.user.email,
+      subject: "Cập nhật trạng thái đơn hàng",
+      message,
+    });
+  } catch (err) {
+    console.log(err);
+  } finally {
+    return res.status(200).json({
+      status: "success",
+      data: {
+        data: doc,
+      },
+    });
+  }
+});
 exports.deleteOrder = factory.deleteOne(Order);
 exports.isOwner = factory.checkPermission(Order);
 exports.setUser = (req, res, next) => {
@@ -139,12 +177,13 @@ exports.countStatusInRange = catchAsync(async (req, res, next) => {
   let dateEnd = new Date(dateTo);
   dateStart.setUTCHours(0, 0, 0, 0);
   dateEnd.setUTCHours(23, 59, 59, 999);
-  dateStart.setTime(dateStart.getTime() + 14 * 60 * 60 * 1000);
-  dateEnd.setTime(dateEnd.getTime() + 14 * 60 * 60 * 1000);
   const data = await Order.aggregate([
     {
       $match: {
-        createdAt: { $gte: dateStart, $lt: dateEnd },
+        createdAt: {
+          $gte: moment.utc(dateStart).toDate(),
+          $lt: moment.utc(dateEnd).toDate(),
+        },
       },
     },
     {
@@ -167,8 +206,6 @@ exports.topProductInRange = catchAsync(async (req, res, next) => {
   let dateEnd = new Date(dateTo);
   dateStart.setUTCHours(0, 0, 0, 0);
   dateEnd.setUTCHours(23, 59, 59, 999);
-  dateStart.setTime(dateStart.getTime() + 14 * 60 * 60 * 1000);
-  dateEnd.setTime(dateEnd.getTime() + 14 * 60 * 60 * 1000);
   const data = await Order.aggregate([
     {
       $unwind: "$cart",
@@ -176,7 +213,10 @@ exports.topProductInRange = catchAsync(async (req, res, next) => {
     {
       $match: {
         status: "Success",
-        createdAt: { $gte: dateStart, $lt: dateEnd },
+        createdAt: {
+          $gte: moment.utc(dateStart).toDate(),
+          $lt: moment.utc(dateEnd).toDate(),
+        },
       },
     },
     {
@@ -200,13 +240,14 @@ exports.sumInRange = catchAsync(async (req, res, next) => {
   let dateEnd = new Date(dateTo);
   dateStart.setUTCHours(0, 0, 0, 0);
   dateEnd.setUTCHours(23, 59, 59, 999);
-  dateStart.setTime(dateStart.getTime() + 14 * 60 * 60 * 1000);
-  dateEnd.setTime(dateEnd.getTime() + 14 * 60 * 60 * 1000);
   const data = await Order.aggregate([
     {
       $match: {
         status: "Success",
-        createdAt: { $gte: dateStart, $lt: dateEnd },
+        createdAt: {
+          $gte: moment.utc(dateStart).toDate(),
+          $lt: moment.utc(dateEnd).toDate(),
+        },
       },
     },
     {

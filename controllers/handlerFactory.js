@@ -109,14 +109,6 @@ exports.updateOne = (Model) =>
         },
       });
     }
-    if (Model == Order && req.body.status == "Cancelled") {
-      const cart = req.order.cart;
-      for (const value of cart) {
-        await Product.findByIdAndUpdate(value.product._id, {
-          $inc: { inventory: value.quantity },
-        });
-      }
-    }
     if (Model == Review || Model == Comment) {
       req.body.updateAt = Date.now() - 1000;
     }

@@ -24,7 +24,7 @@ const loadData = async () => {
               '"><i class="fa fa-edit"></i></button>';
             let btnDelete =
               '<button type="button" class="btn btn-danger btn-sm delete" data-id="' +
-              row.id +
+              row._id +
               '"><i class="fa fa-trash-alt"></i></button></div>';
             return `<div class= "my-3">${btnEdit}${btnDelete}</div>`;
           },

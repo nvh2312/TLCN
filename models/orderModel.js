@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const Transaction = require("./transactionModel");
+const User = require("./userModel");
 
 const orderSchema = new mongoose.Schema(
   {
@@ -34,7 +36,7 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: [true, "Phải có phương thức thanh toán"],
       enum: {
-        values: ["tiền mặt", "paypal"],
+        values: ["tiền mặt", "paypal", "vnpay", "số dư"],
         message: "Phương thức thanh toán là tiền mặt hoặc ngân hàng",
       },
     },
@@ -59,15 +61,34 @@ const orderSchema = new mongoose.Schema(
   }
 );
 
+orderSchema.index({ "$**": "text" });
+
 orderSchema.pre(/^find/, function (next) {
   this.populate({
     path: "user",
-    select: "name",
+    select: "name email",
   });
 
   next();
 });
-orderSchema.index({ "$**": "text" });
+
+orderSchema.statics.updateUserBalance = async function (userId, balance) {
+  await User.findByIdAndUpdate(userId, { $inc: { balance: balance } });
+};
+orderSchema.post("save", function () {
+  if (this.payments === "số dư")
+    this.constructor.updateUserBalance(this.user, -this.totalPrice);
+});
+
+orderSchema.post("findOneAndUpdate", async function (doc) {
+  if (doc.payments !== "tiền mặt" && doc.status === "Cancelled")
+    await Transaction.create({
+      user: doc.user._id.toString(),
+      amount: doc.totalPrice,
+      payments: "refund",
+      order: doc.id,
+    });
+});
 
 const Order = mongoose.model("Order", orderSchema);
 
