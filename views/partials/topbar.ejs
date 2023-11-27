@@ -47,7 +47,7 @@
 <!-- End of Topbar -->
 
 <script>
-  const socket = io("http://localhost:3000");
+  const socket = io("https://hctech.onrender.com");
   socket.on("orders", (data) => {
     showAlert("success", `New order from - ${data.user}. Please check!!!`);
   });
