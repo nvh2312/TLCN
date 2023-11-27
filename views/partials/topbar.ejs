@@ -45,3 +45,10 @@
   </div>
 </nav>
 <!-- End of Topbar -->
+
+<script>
+  const socket = io("http://localhost:3000");
+  socket.on("orders", (data) => {
+    showAlert("success", `New order from - ${data.user}. Please check!!!`);
+  });
+</script>
