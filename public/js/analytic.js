@@ -171,7 +171,7 @@ $(document).ready(async function () {
     ${index + 1}
 </div>
 <div class="col-md-2">
-    <img src="${value.image[0]}"
+    <img src="${value.image[0]}" onerror="this.src='https://res.cloudinary.com/dbekkzxtt/image/upload/v1668578244/dwxqdvfwehpklx9fzx6l.webp'"
         class="img-fluid" alt="Phone">
 </div>
 <div class="col-md-7 d-flex text-center align-items-center">
